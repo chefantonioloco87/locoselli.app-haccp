@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Locoselli HACCP</title>
+  <meta name="theme-color" content="#111111" />
+  <link rel="icon" href="logo.PNG" />
+  <link rel="apple-touch-icon" href="logo-apple.png" />
+  <style>
+    :root{
+      --bg:#0d0d0f;
+      --panel:#17171b;
+      --panel-2:#1f2026;
+      --text:#f5f1e8;
+      --muted:#b8b0a1;
+      --gold:#c9a45c;
+      --gold-2:#e6c989;
+      --ok:#1d8f4d;
+      --warn:#c88c1a;
+      --bad:#b83a3a;
+      --line:#2d2e35;
+      --shadow:0 10px 30px rgba(0,0,0,.28);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:linear-gradient(180deg,#0b0b0d 0%, #111216 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    body{padding:18px 14px 120px}
+    .app{max-width:1200px;margin:0 auto}
+    .hero{
+      background:
+        radial-gradient(circle at top right, rgba(201,164,92,.16), transparent 28%),
+        radial-gradient(circle at top left, rgba(255,255,255,.03), transparent 25%),
+        linear-gradient(135deg,#15151a 0%, #101114 100%);
+      border:1px solid rgba(201,164,92,.18);
+      border-radius:26px;
+      padding:22px;
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.03),transparent);
+      transform:translateX(-100%);
+      animation:shine 7s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes shine { to { transform:translateX(100%);} }
+
+    .topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .brand{
+      display:flex;align-items:center;gap:14px;
+    }
+    .logo{
+      width:64px;height:64px;border-radius:18px;
+      border:1px solid rgba(201,164,92,.35);
+      background:linear-gradient(145deg,#101114,#1a1b20);
+      display:flex;align-items:center;justify-content:center;
+      color:var(--gold-2);font-weight:800;font-size:22px;box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .logo img{
+      width:100%;height:100%;object-fit:cover;display:block;
+    }
+    .brand h1{margin:0;font-size:28px;line-height:1;color:var(--gold-2);letter-spacing:.4px}
+    .brand p{margin:6px 0 0 0;color:var(--muted);font-size:14px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    button, select, input, textarea{
+      font:inherit;border-radius:14px;border:1px solid var(--line);background:var(--panel-2);color:var(--text)
+    }
+    button{
+      padding:12px 16px;cursor:pointer;transition:.2s transform,.2s opacity,.2s background,.2s border-color;
+      box-shadow:none
+    }
+    button:hover{transform:translateY(-1px)}
+    .btn-gold{background:linear-gradient(180deg,#c9a45c,#ad8540);color:#161616;border:none;font-weight:700}
+    .btn-dark{background:#1a1b21}
+    .btn-danger{background:#2a1717;border-color:#532020;color:#ffdbdb}
+    .toolbar{
+      display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px;margin-top:16px
+    }
+    .tile{
+      background:rgba(255,255,255,.02);border:1px solid rgba(201,164,92,.12);border-radius:18px;padding:14px
+    }
+    .tile h3{margin:0 0 8px 0;font-size:14px;color:var(--muted);font-weight:600}
+    .today{font-size:22px;font-weight:800}
+    .muted{color:var(--muted)}
+    .quickstats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+    .stat{
+      background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)
+    }
+    .stat .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+    .stat .v{font-size:28px;font-weight:800;margin-top:6px}
+    .good{color:#8fe0af}.warn{color:#f0c66a}.bad{color:#ff9a9a}
+
+    .layout{display:grid;grid-template-columns:300px 1fr;gap:18px;margin-top:18px}
+    .sidebar,.contentCard{
+      background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)
+    }
+    .sidebar{padding:12px;position:sticky;top:14px;height:max-content}
+    .navbtn{
+      width:100%;text-align:left;padding:14px 14px;border-radius:16px;background:transparent;border:1px solid transparent;color:var(--text);display:flex;justify-content:space-between;align-items:center
+    }
+    .navbtn.active{background:#1d1d23;border-color:rgba(201,164,92,.24);color:var(--gold-2)}
+    .navbtn + .navbtn{margin-top:8px}
+    .contentCard{padding:18px}
+    .section{display:none}
+    .section.active{display:block}
+    .section h2{margin:0 0 6px 0;color:var(--gold-2)}
+    .section p.desc{margin:0 0 18px 0;color:var(--muted)}
+
+    .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .card{
+      background:var(--panel-2);border:1px solid var(--line);border-radius:18px;padding:14px
+    }
+    .card h4{margin:0 0 12px 0}
+    .row{display:grid;grid-template-columns:1fr 110px auto;gap:10px;align-items:center;margin:10px 0}
+    .row label{font-size:14px}
+    input[type="number"], input[type="text"], input[type="date"], input[type="time"], select, textarea{
+      width:100%;padding:11px 12px
+    }
+    textarea{min-height:92px;resize:vertical}
+    .chip{
+      display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--line)
+    }
+    .chip.ok{background:rgba(29,143,77,.18);color:#9ef0bf;border-color:rgba(29,143,77,.35)}
+    .chip.warn{background:rgba(200,140,26,.16);color:#ffd58a;border-color:rgba(200,140,26,.35)}
+    .chip.bad{background:rgba(184,58,58,.16);color:#ffafaf;border-color:rgba(184,58,58,.35)}
+
+    .checkgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .checkitem{
+      background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:12px
+    }
+    .checkitem span{font-size:14px}
+    .toggle{transform:scale(1.25)}
+
+    .inline{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .small{font-size:12px}
+    .tableWrap{overflow:auto;border:1px solid var(--line);border-radius:16px}
+    table{width:100%;border-collapse:collapse;background:var(--panel-2)}
+    th, td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+    th{color:var(--gold-2);background:#18191f;position:sticky;top:0}
+    tr:hover td{background:rgba(255,255,255,.015)}
+
+    .footerActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .pill{
+      background:#121318;border:1px solid var(--line);padding:8px 12px;border-radius:999px;color:var(--muted);font-size:12px
+    }
+    .right{justify-content:flex-end}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .mb12{margin-bottom:12px}.mb16{margin-bottom:16px}.mt16{margin-top:16px}
+    canvas{background:#121318;border:1px solid var(--line);border-radius:16px;width:100%;height:240px}
+
+    @media (max-width: 900px){
+      .toolbar, .quickstats, .cards, .grid3, .grid2, .layout, .checkgrid{grid-template-columns:1fr}
+      .sidebar{position:static}
+      .row{grid-template-columns:1fr 110px}
+      .row .statusbox{grid-column:1 / -1}
+    }
+
+    @media print{
+      body{background:#fff;color:#000;padding:0}
+      .sidebar,.actions,.footerActions,.toolbar,.quickstats,.navbtn,.hero:before{display:none !important}
+      .layout{grid-template-columns:1fr}
+      .contentCard, .hero, .card, .stat, .tile{box-shadow:none;border:1px solid #ccc;background:#fff;color:#000}
+      table{background:#fff}
+      th{background:#f5f5f5;color:#000}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="hero">
+    <div class="topline">
+      <div class="brand">
+        <div class="logo"><img src="logo.PNG" alt="Locoselli logo" onerror="this.style.display='none'; this.parentNode.textContent='L';"></div>
+        <div>
+          <h1>Locoselli HACCP</h1>
+          <p id="subtitle">Controlli giornalieri · Temperature · Pulizie · Scadenze · Storico</p>
+        </div>
+      </div>
+      <div class="actions">
+        <select id="langSelect" aria-label="Lingua">
+          <option value="it">Italiano</option>
+          <option value="de">Deutsch</option>
+        </select>
+        <button class="btn-dark" id="backupBtn">Esporta backup</button>
+        <button class="btn-dark" id="importBtn">Importa backup</button>
+        <input type="file" id="importFile" accept=".json" hidden />
+        <button class="btn-gold" onclick="window.print()">Stampa / PDF</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="tile">
+        <h3 id="todayLabel">Oggi</h3>
+        <div class="today" id="todayText"></div>
+        <div class="muted small mt16" id="adminLabel">Admin: Totò</div>
+      </div>
+      <div class="tile">
+        <h3 id="recordDateLabel">Data controllo</h3>
+        <input type="date" id="recordDate" />
+      </div>
+      <div class="tile">
+        <h3 id="recordTimeLabel">Ora controllo</h3>
+        <input type="time" id="recordTime" />
+      </div>
+    </div>
+
+    <div class="tile mt16">
+      <h3 id="notifTitle">Promemoria HACCP</h3>
+      <div class="muted small" id="notifDesc">Per notifiche automatiche vere su iPhone serve una PWA con push server. In questa versione hai il logo integrato e i promemoria esterni attivati alle 10:00 e alle 22:00 ogni giorno.</div>
+    </div>
+
+    <div class="quickstats">
+      <div class="stat">
+        <div class="k" id="stat1k">Temperature OK</div>
+        <div class="v good" id="stat1v">0</div>
+      </div>
+      <div class="stat">
+        <div class="k" id="stat2k">Fuori range</div>
+        <div class="v bad" id="stat2v">0</div>
+      </div>
+      <div class="stat">
+        <div class="k" id="stat3k">Pulizie fatte</div>
+        <div class="v warn" id="stat3v">0</div>
+      </div>
+      <div class="stat">
+        <div class="k" id="stat4k">Scadenze vicine</div>
+        <div class="v warn" id="stat4v">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <button class="navbtn active" data-target="dashboard">🏠 <span id="nav_dashboard">Dashboard</span></button>
+      <button class="navbtn" data-target="temps">🌡️ <span id="nav_temps">Temperature</span></button>
+      <button class="navbtn" data-target="cleaning">🧼 <span id="nav_cleaning">Pulizie</span></button>
+      <button class="navbtn" data-target="equipment">⚙️ <span id="nav_equipment">Attrezzature</span></button>
+      <button class="navbtn" data-target="expiry">📦 <span id="nav_expiry">Scadenze</span></button>
+      <button class="navbtn" data-target="cooking">🍗 <span id="nav_cooking">Cotture sicure</span></button>
+      <button class="navbtn" data-target="history">📚 <span id="nav_history">Storico</span></button>
+      <button class="navbtn" data-target="settings">🛠️ <span id="nav_settings">Impostazioni</span></button>
+    </aside>
+
+    <main class="contentCard">
+      <section id="dashboard" class="section active">
+        <h2 id="dash_title">Dashboard giornaliera</h2>
+        <p class="desc" id="dash_desc">Compila velocemente i controlli HACCP di oggi o di una data passata.</p>
+
+        <div class="cards">
+          <div class="card">
+            <h4 id="dash_alerts">Alert oggi</h4>
+            <div id="alertsBox" class="inline"></div>
+          </div>
+          <div class="card">
+            <h4 id="dash_actions">Azioni rapide</h4>
+            <div class="footerActions">
+              <button class="btn-gold" onclick="saveDayRecord()" id="saveDayBtn">Salva giornata</button>
+              <button class="btn-dark" onclick="loadSelectedDay()" id="loadDayBtn">Carica data</button>
+              <button class="btn-dark" onclick="fillDemo()" id="demoBtn">Demo</button>
+              <button class="btn-danger" onclick="resetSelectedDay()" id="resetDayBtn">Azzera data</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid2 mt16">
+          <div class="card">
+            <h4 id="dash_recent">Ultimi controlli</h4>
+            <div id="recentDays"></div>
+          </div>
+          <div class="card">
+            <h4 id="dash_chart">Andamento temperature</h4>
+            <canvas id="tempChart" width="600" height="240"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section id="temps" class="section">
+        <h2 id="temps_title">Temperature</h2>
+        <p class="desc" id="temps_desc">Inserisci i valori. Il sistema segnala in automatico se sei fuori range.</p>
+
+        <div class="cards">
+          <div class="card">
+            <h4 id="temps_kitchen">Cucina</h4>
+            <div id="kitchenTemps"></div>
+          </div>
+          <div class="card">
+            <h4 id="temps_room">Sala / Bar</h4>
+            <div id="roomTemps"></div>
+          </div>
+        </div>
+
+        <div class="footerActions">
+          <button class="btn-gold" onclick="saveDayRecord()" id="temps_save">Salva temperature</button>
+        </div>
+      </section>
+
+      <section id="cleaning" class="section">
+        <h2 id="clean_title">Pulizie giornaliere</h2>
+        <p class="desc" id="clean_desc">Spunta quello che è stato fatto. Puoi aggiungere note se serve.</p>
+        <div class="checkgrid" id="cleaningGrid"></div>
+      </section>
+
+      <section id="equipment" class="section">
+        <h2 id="equip_title">Attrezzature</h2>
+        <p class="desc" id="equip_desc">Controllo pulizia e funzionamento delle attrezzature.</p>
+        <div class="checkgrid" id="equipmentGrid"></div>
+      </section>
+
+      <section id="expiry" class="section">
+        <h2 id="expiry_title">Scadenze prodotti</h2>
+        <p class="desc" id="expiry_desc">Aggiungi prodotto, data apertura e data scadenza. Alert automatico sui prodotti vicini alla scadenza.</p>
+
+        <div class="grid3 mb16">
+          <input type="text" id="expName" placeholder="Nome prodotto" />
+          <input type="date" id="expOpen" />
+          <input type="date" id="expExpiry" />
+        </div>
+        <div class="footerActions">
+          <button class="btn-gold" onclick="addExpiry()" id="addExpiryBtn">Aggiungi prodotto</button>
+        </div>
+
+        <div class="tableWrap mt16">
+          <table>
+            <thead>
+              <tr>
+                <th id="th_prod">Prodotto</th>
+                <th id="th_open">Apertura</th>
+                <th id="th_exp">Scadenza</th>
+                <th id="th_status">Stato</th>
+                <th id="th_act">Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="expiryTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cooking" class="section">
+        <h2 id="cook_title">Cotture sicure</h2>
+        <p class="desc" id="cook_desc">Registra la temperatura al cuore o segna la conformità.</p>
+
+        <div class="cards">
+          <div class="card">
+            <h4>Pollo</h4>
+            <div class="row">
+              <label id="cook_temp_core">Temperatura al cuore</label>
+              <input type="number" id="cookChicken" step="0.1" placeholder="°C" />
+              <div class="statusbox"><span class="chip" id="cookChickenStatus">—</span></div>
+            </div>
+            <div class="small muted">Range consigliato: ≥ 75°C</div>
+          </div>
+          <div class="card">
+            <h4>Salmone</h4>
+            <div class="row">
+              <label id="cook_temp_core2">Temperatura al cuore</label>
+              <input type="number" id="cookSalmon" step="0.1" placeholder="°C" />
+              <div class="statusbox"><span class="chip" id="cookSalmonStatus">—</span></div>
+            </div>
+            <div class="small muted">Range impostato: ≥ 60°C</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="history" class="section">
+        <h2 id="hist_title">Storico HACCP</h2>
+        <p class="desc" id="hist_desc">Archivio completo per data. Puoi caricare, stampare o esportare i controlli già salvati.</p>
+        <div class="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th id="hist_date">Data</th>
+                <th id="hist_time">Ora</th>
+                <th id="hist_tempok">Temp OK</th>
+                <th id="hist_clean">Pulizie</th>
+                <th id="hist_expiry">Scadenze</th>
+                <th id="hist_action">Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="historyTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="settings" class="section">
+        <h2 id="set_title">Impostazioni</h2>
+        <p class="desc" id="set_desc">Configurazione rapida per l’uso quotidiano.</p>
+
+        <div class="cards">
+          <div class="card">
+            <h4 id="set_ranges">Range temperature</h4>
+            <div class="grid3">
+              <div>
+                <label class="small muted">Frigo min</label>
+                <input type="number" id="rangeFridgeMin" step="0.1" />
+              </div>
+              <div>
+                <label class="small muted">Frigo max</label>
+                <input type="number" id="rangeFridgeMax" step="0.1" />
+              </div>
+              <div>
+                <label class="small muted">Congelatore max</label>
+                <input type="number" id="rangeFreezerMax" step="0.1" />
+              </div>
+            </div>
+            <div class="grid2 mt16">
+              <div>
+                <label class="small muted">Cottura pollo min</label>
+                <input type="number" id="rangeChickenMin" step="0.1" />
+              </div>
+              <div>
+                <label class="small muted">Cottura salmone min</label>
+                <input type="number" id="rangeSalmonMin" step="0.1" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h4 id="set_notes">Note giornata</h4>
+            <textarea id="dailyNotes" placeholder="Note, azioni correttive, osservazioni..."></textarea>
+            <div class="footerActions">
+              <button class="btn-gold" onclick="saveDayRecord()" id="saveSettingsDay">Salva tutto</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "locoselli_haccp_v2";
+
+const labels = {
+  it: {
+    subtitle:"Controlli giornalieri · Temperature · Pulizie · Scadenze · Storico",
+    today:"Oggi", admin:"Admin: Totò", recordDate:"Data controllo", recordTime:"Ora controllo",
+    stat1:"Temperature OK", stat2:"Fuori range", stat3:"Pulizie fatte", stat4:"Scadenze vicine",
+    dashboard:"Dashboard", temps:"Temperature", cleaning:"Pulizie", equipment:"Attrezzature", expiry:"Scadenze", cooking:"Cotture sicure", history:"Storico", settings:"Impostazioni",
+    dashTitle:"Dashboard giornaliera", dashDesc:"Compila velocemente i controlli HACCP di oggi o di una data passata.",
+    alerts:"Alert oggi", quick:"Azioni rapide", saveDay:"Salva giornata", loadDay:"Carica data", demo:"Demo", resetDay:"Azzera data", recent:"Ultimi controlli", chart:"Andamento temperature",
+    tempsTitle:"Temperature", tempsDesc:"Inserisci i valori. Il sistema segnala in automatico se sei fuori range.", kitchen:"Cucina", room:"Sala / Bar", saveTemps:"Salva temperature",
+    cleanTitle:"Pulizie giornaliere", cleanDesc:"Spunta quello che è stato fatto. Puoi aggiungere note se serve.",
+    equipTitle:"Attrezzature", equipDesc:"Controllo pulizia e funzionamento delle attrezzature.",
+    expiryTitle:"Scadenze prodotti", expiryDesc:"Aggiungi prodotto, data apertura e data scadenza. Alert automatico sui prodotti vicini alla scadenza.", addProduct:"Aggiungi prodotto",
+    product:"Prodotto", open:"Apertura", exp:"Scadenza", status:"Stato", actions:"Azioni",
+    cookTitle:"Cotture sicure", cookDesc:"Registra la temperatura al cuore o segna la conformità.", core:"Temperatura al cuore",
+    histTitle:"Storico HACCP", histDesc:"Archivio completo per data. Puoi caricare, stampare o esportare i controlli già salvati.", date:"Data", time:"Ora", tempOk:"Temp OK", clean:"Pulizie", histExp:"Scadenze",
+    setTitle:"Impostazioni", setDesc:"Configurazione rapida per l’uso quotidiano.", ranges:"Range temperature", notes:"Note giornata",
+    close:"In scadenza", expired:"Scaduto", ok:"OK", delete:"Elimina", load:"Carica", noAlerts:"Nessun alert", saved:"Giornata salvata", resetConfirm:"Vuoi azzerare i dati della data selezionata?", importError:"File non valido", imported:"Backup importato",
+    retro:"Inserimento retroattivo"
+  },
+  de: {
+    subtitle:"Tägliche Kontrollen · Temperaturen · Reinigung · Fristen · Archiv",
+    today:"Heute", admin:"Admin: Totò", recordDate:"Kontrolldatum", recordTime:"Kontrollzeit",
+    stat1:"Temperaturen OK", stat2:"Außerhalb Bereich", stat3:"Reinigungen erledigt", stat4:"Bald ablaufend",
+    dashboard:"Dashboard", temps:"Temperaturen", cleaning:"Reinigung", equipment:"Geräte", expiry:"Fristen", cooking:"Sichere Garung", history:"Archiv", settings:"Einstellungen",
+    dashTitle:"Tägliches Dashboard", dashDesc:"Fülle die HACCP-Kontrollen von heute oder einem vergangenen Datum schnell aus.",
+    alerts:"Warnungen heute", quick:"Schnellaktionen", saveDay:"Tag speichern", loadDay:"Datum laden", demo:"Demo", resetDay:"Datum löschen", recent:"Letzte Kontrollen", chart:"Temperaturverlauf",
+    tempsTitle:"Temperaturen", tempsDesc:"Werte eingeben. Das System meldet automatisch Werte außerhalb des Bereichs.", kitchen:"Küche", room:"Saal / Bar", saveTemps:"Temperaturen speichern",
+    cleanTitle:"Tägliche Reinigung", cleanDesc:"Abhaken, was erledigt wurde. Notizen können ergänzt werden.",
+    equipTitle:"Geräte", equipDesc:"Kontrolle von Reinigung und Funktion der Geräte.",
+    expiryTitle:"Produktfristen", expiryDesc:"Produkt, Öffnungsdatum und Ablaufdatum hinzufügen. Automatische Warnung bei nahen Fristen.", addProduct:"Produkt hinzufügen",
+    product:"Produkt", open:"Geöffnet", exp:"Ablauf", status:"Status", actions:"Aktionen",
+    cookTitle:"Sichere Garung", cookDesc:"Kerntemperatur eintragen oder Konformität markieren.", core:"Kerntemperatur",
+    histTitle:"HACCP Archiv", histDesc:"Vollständiges Archiv nach Datum. Bereits gespeicherte Kontrollen laden, drucken oder exportieren.", date:"Datum", time:"Uhrzeit", tempOk:"Temp OK", clean:"Reinigung", histExp:"Fristen",
+    setTitle:"Einstellungen", setDesc:"Schnelle Konfiguration für den Alltag.", ranges:"Temperaturbereiche", notes:"Tagesnotizen",
+    close:"Kurz vor Ablauf", expired:"Abgelaufen", ok:"OK", delete:"Löschen", load:"Laden", noAlerts:"Keine Warnungen", saved:"Tag gespeichert", resetConfirm:"Daten des gewählten Datums wirklich löschen?", importError:"Ungültige Datei", imported:"Backup importiert",
+    retro:"Nachträglicher Eintrag"
+  }
+};
+
+const config = {
+  kitchenTemps: [
+    { key:"cellaVerdure", label:"Frigo cella verdure", type:"fridge" },
+    { key:"lineaPrimi", label:"Frigo linea primi", type:"fridge" },
+    { key:"lineaSecondi", label:"Frigo linea secondi", type:"fridge" },
+    { key:"frigoAntipasti", label:"Frigo antipasti", type:"fridge" },
+    { key:"congelatoreCucina", label:"Congelatore cucina", type:"freezer" },
+    { key:"abbattitore", label:"Abbattitore", type:"freezer" }
+  ],
+  roomTemps: [
+    { key:"frigoViniRossi", label:"Frigo vini rossi", type:"fridge" },
+    { key:"frigoViniBianchi", label:"Frigo vini bianchi", type:"fridge" },
+    { key:"congelatoreSala", label:"Congelatore sala", type:"freezer" },
+    { key:"frigoBevande", label:"Frigo bevande", type:"fridge" },
+    { key:"cellaSottoBevande", label:"Cella sotto bevande", type:"fridge" }
+  ],
+  cleaning: [
+    "Bagno sopra", "Bagno sotto", "Bagno personale", "Pavimenti",
+    "Finestre", "Scaffali", "Tavoli", "Superfici lavoro", "Celle e frigo"
+  ],
+  equipment: [
+    "Bollitore", "Cuocipasta", "Griglia", "Cappa", "Forno ventilato",
+    "Thermomix 1", "Thermomix 2", "Planetaria", "Macchina caffè", "Scaffali fuori"
+  ],
+  defaultRanges: {
+    fridgeMin: 0, fridgeMax: 4, freezerMax: -18,
+    chickenMin: 75, salmonMin: 60
+  }
+};
+
+let state = loadState();
+
+function defaultState(){
+  const today = new Date();
+  const d = today.toISOString().slice(0,10);
+  const t = today.toTimeString().slice(0,5);
+  return {
+    language:"it",
+    ranges:{...config.defaultRanges},
+    records:{},
+    selectedDate:d,
+    selectedTime:t
+  };
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    return {...defaultState(), ...JSON.parse(raw)};
+  }catch(e){ return defaultState(); }
+}
+function persist(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+function ensureRecord(date){
+  if(!state.records[date]){
+    const clean = Object.fromEntries(config.cleaning.map(x=>[x,false]));
+    const equip = Object.fromEntries(config.equipment.map(x=>[{clean:false,ok:false}]).map((v,i)=>[config.equipment[i], v[0]]));
+    const temps = {};
+    [...config.kitchenTemps, ...config.roomTemps].forEach(t => temps[t.key]="");
+    state.records[date] = {
+      date,
+      time: state.selectedTime || "09:00",
+      temps,
+      cleaning: clean,
+      equipment: equip,
+      expiry: [],
+      cooking: { chicken:"", salmon:"" },
+      notes:""
+    };
+  }
+  return state.records[date];
+}
+function selectedRecord(){
+  return ensureRecord(state.selectedDate);
+}
+
+function setNowUI(){
+  const now = new Date();
+  const opts = {weekday:"long", day:"2-digit", month:"long", year:"numeric"};
+  document.getElementById("todayText").textContent = now.toLocaleDateString(state.language==="it"?"it-IT":"de-DE", opts);
+}
+function initTopInputs(){
+  document.getElementById("recordDate").value = state.selectedDate;
+  document.getElementById("recordTime").value = state.selectedTime;
+  document.getElementById("recordDate").addEventListener("change", e=>{
+    state.selectedDate = e.target.value;
+    ensureRecord(state.selectedDate);
+    loadSelectedDay(false);
+    persist();
+  });
+  document.getElementById("recordTime").addEventListener("change", e=>{
+    state.selectedTime = e.target.value;
+    selectedRecord().time = e.target.value;
+    persist();
+    renderAll();
+  });
+}
+function setupNav(){
+  document.querySelectorAll(".navbtn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".navbtn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+      document.getElementById(btn.dataset.target).classList.add("active");
+    });
+  });
+}
+function createTempRows(){
+  const mk = (item)=>`
+    <div class="row">
+      <label>${item.label}</label>
+      <input type="number" step="0.1" id="${item.key}" placeholder="°C">
+      <div class="statusbox"><span class="chip" id="${item.key}_status">—</span></div>
+    </div>
+  `;
+  document.getElementById("kitchenTemps").innerHTML = config.kitchenTemps.map(mk).join("");
+  document.getElementById("roomTemps").innerHTML = config.roomTemps.map(mk).join("");
+  [...config.kitchenTemps, ...config.roomTemps].forEach(item=>{
+    document.getElementById(item.key).addEventListener("input", e=>{
+      selectedRecord().temps[item.key] = e.target.value;
+      updateTempStatus(item);
+      persist(); renderStats(); renderAlerts();
+    });
+  });
+}
+function classifyTemp(item, val){
+  if(val === "" || isNaN(Number(val))) return {text:"—", cls:""};
+  const v = Number(val);
+  if(item.type==="fridge"){
+    if(v >= state.ranges.fridgeMin && v <= state.ranges.fridgeMax) return {text:"OK", cls:"ok"};
+    return {text:"Fuori range", cls:"bad"};
+  }
+  if(item.type==="freezer"){
+    if(v <= state.ranges.freezerMax) return {text:"OK", cls:"ok"};
+    return {text:"Fuori range", cls:"bad"};
+  }
+  return {text:"—", cls:""};
+}
+function updateTempStatus(item){
+  const el = document.getElementById(item.key);
+  const status = document.getElementById(item.key+"_status");
+  const res = classifyTemp(item, el.value);
+  status.textContent = res.text;
+  status.className = "chip " + (res.cls || "");
+}
+function createChecklists(){
+  document.getElementById("cleaningGrid").innerHTML = config.cleaning.map(name=>`
+    <div class="checkitem">
+      <span>${name}</span>
+      <input class="toggle" type="checkbox" id="clean_${slug(name)}">
+    </div>`).join("");
+  document.getElementById("equipmentGrid").innerHTML = config.equipment.map(name=>`
+    <div class="checkitem">
+      <span>${name}</span>
+      <div class="inline">
+        <label class="small muted">Pulito <input class="toggle" type="checkbox" id="eqc_${slug(name)}"></label>
+        <label class="small muted">OK <input class="toggle" type="checkbox" id="eqo_${slug(name)}"></label>
+      </div>
+    </div>`).join("");
+
+  config.cleaning.forEach(name=>{
+    document.getElementById("clean_"+slug(name)).addEventListener("change", e=>{
+      selectedRecord().cleaning[name] = e.target.checked; persist(); renderStats();
+    });
+  });
+  config.equipment.forEach(name=>{
+    document.getElementById("eqc_"+slug(name)).addEventListener("change", e=>{
+      selectedRecord().equipment[name].clean = e.target.checked; persist();
+    });
+    document.getElementById("eqo_"+slug(name)).addEventListener("change", e=>{
+      selectedRecord().equipment[name].ok = e.target.checked; persist();
+    });
+  });
+}
+function slug(s){ return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g,"_"); }
+
+function renderSelectedRecord(){
+  const rec = selectedRecord();
+  document.getElementById("recordDate").value = state.selectedDate;
+  document.getElementById("recordTime").value = rec.time || state.selectedTime || "09:00";
+
+  [...config.kitchenTemps, ...config.roomTemps].forEach(item=>{
+    const el = document.getElementById(item.key);
+    el.value = rec.temps[item.key] ?? "";
+    updateTempStatus(item);
+  });
+  config.cleaning.forEach(name=>{
+    document.getElementById("clean_"+slug(name)).checked = !!rec.cleaning[name];
+  });
+  config.equipment.forEach(name=>{
+    document.getElementById("eqc_"+slug(name)).checked = !!rec.equipment[name]?.clean;
+    document.getElementById("eqo_"+slug(name)).checked = !!rec.equipment[name]?.ok;
+  });
+
+  document.getElementById("cookChicken").value = rec.cooking.chicken ?? "";
+  document.getElementById("cookSalmon").value = rec.cooking.salmon ?? "";
+  document.getElementById("dailyNotes").value = rec.notes || "";
+
+  updateCookingStatus();
+  renderExpiry();
+}
+function updateCookingStatus(){
+  const rec = selectedRecord();
+  const chicken = Number(rec.cooking.chicken);
+  const salmon = Number(rec.cooking.salmon);
+  const c = document.getElementById("cookChickenStatus");
+  const s = document.getElementById("cookSalmonStatus");
+  if(rec.cooking.chicken === "" || isNaN(chicken)){ c.textContent="—"; c.className="chip"; }
+  else if(chicken >= state.ranges.chickenMin){ c.textContent="OK"; c.className="chip ok"; }
+  else { c.textContent="Fuori range"; c.className="chip bad"; }
+
+  if(rec.cooking.salmon === "" || isNaN(salmon)){ s.textContent="—"; s.className="chip"; }
+  else if(salmon >= state.ranges.salmonMin){ s.textContent="OK"; s.className="chip ok"; }
+  else { s.textContent="Fuori range"; s.className="chip bad"; }
+}
+function attachCookingHandlers(){
+  document.getElementById("cookChicken").addEventListener("input", e=>{
+    selectedRecord().cooking.chicken = e.target.value; updateCookingStatus(); persist();
+  });
+  document.getElementById("cookSalmon").addEventListener("input", e=>{
+    selectedRecord().cooking.salmon = e.target.value; updateCookingStatus(); persist();
+  });
+  document.getElementById("dailyNotes").addEventListener("input", e=>{
+    selectedRecord().notes = e.target.value; persist();
+  });
+}
+function renderExpiry(){
+  const tbody = document.getElementById("expiryTable");
+  const L = labels[state.language];
+  const today = new Date(state.selectedDate || new Date().toISOString().slice(0,10));
+  tbody.innerHTML = "";
+  selectedRecord().expiry.forEach((item, idx)=>{
+    let chip = `<span class="chip ok">${L.ok}</span>`;
+    if(item.expiry){
+      const days = Math.ceil((new Date(item.expiry) - today)/(1000*60*60*24));
+      if(days < 0) chip = `<span class="chip bad">${L.expired}</span>`;
+      else if(days <= 2) chip = `<span class="chip warn">${L.close}</span>`;
+    }
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${item.name || ""}</td>
+      <td>${item.open || ""}</td>
+      <td>${item.expiry || ""}</td>
+      <td>${chip}</td>
+      <td><button class="btn-danger small" onclick="removeExpiry(${idx})">${L.delete}</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+function addExpiry(){
+  const name = document.getElementById("expName").value.trim();
+  const open = document.getElementById("expOpen").value;
+  const expiry = document.getElementById("expExpiry").value;
+  if(!name) return;
+  selectedRecord().expiry.push({name, open, expiry});
+  document.getElementById("expName").value = "";
+  document.getElementById("expOpen").value = "";
+  document.getElementById("expExpiry").value = "";
+  persist(); renderExpiry(); renderStats(); renderAlerts(); renderHistory();
+}
+function removeExpiry(idx){
+  selectedRecord().expiry.splice(idx,1);
+  persist(); renderExpiry(); renderStats(); renderAlerts(); renderHistory();
+}
+function countStats(){
+  const rec = selectedRecord();
+  const allTemps = [...config.kitchenTemps, ...config.roomTemps];
+  let ok = 0, bad = 0;
+  allTemps.forEach(item=>{
+    const res = classifyTemp(item, rec.temps[item.key]);
+    if(res.cls==="ok") ok++;
+    if(res.cls==="bad") bad++;
+  });
+  const clean = Object.values(rec.cleaning).filter(Boolean).length;
+  const today = new Date(state.selectedDate);
+  let expirySoon = 0;
+  rec.expiry.forEach(x=>{
+    if(!x.expiry) return;
+    const days = Math.ceil((new Date(x.expiry)-today)/(1000*60*60*24));
+    if(days <= 2) expirySoon++;
+  });
+  return {ok, bad, clean, expirySoon};
+}
+function renderStats(){
+  const st = countStats();
+  document.getElementById("stat1v").textContent = st.ok;
+  document.getElementById("stat2v").textContent = st.bad;
+  document.getElementById("stat3v").textContent = st.clean;
+  document.getElementById("stat4v").textContent = st.expirySoon;
+}
+function renderAlerts(){
+  const box = document.getElementById("alertsBox");
+  const L = labels[state.language];
+  box.innerHTML = "";
+  const rec = selectedRecord();
+  let msgs = [];
+  [...config.kitchenTemps, ...config.roomTemps].forEach(item=>{
+    const res = classifyTemp(item, rec.temps[item.key]);
+    if(res.cls==="bad") msgs.push({t:item.label, cls:"bad"});
+  });
+  rec.expiry.forEach(item=>{
+    if(!item.expiry) return;
+    const days = Math.ceil((new Date(item.expiry)-new Date(state.selectedDate))/(1000*60*60*24));
+    if(days < 0) msgs.push({t:`${item.name} · ${L.expired}`, cls:"bad"});
+    else if(days <= 2) msgs.push({t:`${item.name} · ${L.close}`, cls:"warn"});
+  });
+  if(rec.cooking.chicken !== "" && Number(rec.cooking.chicken) < state.ranges.chickenMin) msgs.push({t:"Pollo · fuori range", cls:"bad"});
+  if(rec.cooking.salmon !== "" && Number(rec.cooking.salmon) < state.ranges.salmonMin) msgs.push({t:"Salmone · fuori range", cls:"bad"});
+  if(!msgs.length) msgs = [{t:L.noAlerts, cls:"ok"}];
+
+  msgs.forEach(m=>{
+    const el = document.createElement("span");
+    el.className = "chip " + m.cls;
+    el.textContent = m.t;
+    box.appendChild(el);
+  });
+}
+function saveDayRecord(silent=false){
+  selectedRecord().time = document.getElementById("recordTime").value || state.selectedTime;
+  persist();
+  renderHistory(); renderRecent(); renderChart(); renderStats(); renderAlerts();
+  if(!silent) alert(labels[state.language].saved);
+}
+function loadSelectedDay(showAlert=true){
+  ensureRecord(state.selectedDate);
+  renderAll();
+  if(showAlert) {}
+}
+function resetSelectedDay(){
+  if(!confirm(labels[state.language].resetConfirm)) return;
+  delete state.records[state.selectedDate];
+  ensureRecord(state.selectedDate);
+  persist();
+  renderAll();
+}
+function renderHistory(){
+  const tbody = document.getElementById("historyTable");
+  const L = labels[state.language];
+  const dates = Object.keys(state.records).sort().reverse();
+  tbody.innerHTML = dates.map(date=>{
+    const rec = state.records[date];
+    const tempOk = [...config.kitchenTemps, ...config.roomTemps].filter(item=>classifyTemp(item, rec.temps[item.key]).cls==="ok").length;
+    const clean = Object.values(rec.cleaning||{}).filter(Boolean).length;
+    const expCount = (rec.expiry||[]).length;
+    return `<tr>
+      <td>${date}</td>
+      <td>${rec.time || ""}</td>
+      <td>${tempOk}</td>
+      <td>${clean}</td>
+      <td>${expCount}</td>
+      <td>
+        <button class="btn-dark small" onclick="goDate('${date}')">${L.load}</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+function renderRecent(){
+  const box = document.getElementById("recentDays");
+  const dates = Object.keys(state.records).sort().reverse().slice(0,6);
+  if(!dates.length){ box.innerHTML = `<span class="pill">—</span>`; return; }
+  box.innerHTML = dates.map(d=>`<button class="btn-dark small mb12" style="display:block;width:100%" onclick="goDate('${d}')">${d}</button>`).join("");
+}
+function goDate(date){
+  state.selectedDate = date;
+  document.getElementById("recordDate").value = date;
+  renderAll();
+}
+function renderChart(){
+  const canvas = document.getElementById("tempChart");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  ctx.fillStyle = "#121318";
+  ctx.fillRect(0,0,W,H);
+
+  const dates = Object.keys(state.records).sort().slice(-7);
+  const values = dates.map(d=>{
+    const rec = state.records[d];
+    const nums = [...config.kitchenTemps, ...config.roomTemps]
+      .map(t => Number(rec.temps[t.key]))
+      .filter(v => !isNaN(v));
+    if(!nums.length) return null;
+    return nums.reduce((a,b)=>a+b,0)/nums.length;
+  });
+
+  ctx.strokeStyle = "rgba(255,255,255,.12)";
+  ctx.lineWidth = 1;
+  for(let i=0;i<5;i++){
+    const y = 20 + i*((H-40)/4);
+    ctx.beginPath(); ctx.moveTo(20,y); ctx.lineTo(W-20,y); ctx.stroke();
+  }
+
+  if(values.filter(v=>v!==null).length < 2){
+    ctx.fillStyle = "#b8b0a1";
+    ctx.font = "14px sans-serif";
+    ctx.fillText("Dati insufficienti", 24, 34);
+    return;
+  }
+
+  const valid = values.filter(v=>v!==null);
+  const min = Math.min(...valid) - 1;
+  const max = Math.max(...valid) + 1;
+  const stepX = (W-50) / Math.max(dates.length-1,1);
+
+  ctx.strokeStyle = "#c9a45c";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  values.forEach((v,i)=>{
+    if(v===null) return;
+    const x = 25 + i*stepX;
+    const y = H-20 - ((v-min)/(max-min || 1))*(H-50);
+    if(i===0 || values[i-1]===null) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  ctx.fillStyle = "#e6c989";
+  values.forEach((v,i)=>{
+    if(v===null) return;
+    const x = 25 + i*stepX;
+    const y = H-20 - ((v-min)/(max-min || 1))*(H-50);
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+    ctx.font = "11px sans-serif";
+    ctx.fillText(dates[i].slice(5), x-12, H-6);
+  });
+}
+function applyLanguage(){
+  const L = labels[state.language];
+  document.getElementById("subtitle").textContent = L.subtitle;
+  document.getElementById("todayLabel").textContent = L.today;
+  document.getElementById("adminLabel").textContent = L.admin;
+  document.getElementById("recordDateLabel").textContent = L.recordDate;
+  document.getElementById("recordTimeLabel").textContent = L.recordTime;
+  document.getElementById("stat1k").textContent = L.stat1;
+  document.getElementById("stat2k").textContent = L.stat2;
+  document.getElementById("stat3k").textContent = L.stat3;
+  document.getElementById("stat4k").textContent = L.stat4;
+
+  document.getElementById("nav_dashboard").textContent = L.dashboard;
+  document.getElementById("nav_temps").textContent = L.temps;
+  document.getElementById("nav_cleaning").textContent = L.cleaning;
+  document.getElementById("nav_equipment").textContent = L.equipment;
+  document.getElementById("nav_expiry").textContent = L.expiry;
+  document.getElementById("nav_cooking").textContent = L.cooking;
+  document.getElementById("nav_history").textContent = L.history;
+  document.getElementById("nav_settings").textContent = L.settings;
+
+  document.getElementById("dash_title").textContent = L.dashTitle;
+  document.getElementById("dash_desc").textContent = L.dashDesc;
+  document.getElementById("dash_alerts").textContent = L.alerts;
+  document.getElementById("dash_actions").textContent = L.quick;
+  document.getElementById("saveDayBtn").textContent = L.saveDay;
+  document.getElementById("loadDayBtn").textContent = L.loadDay;
+  document.getElementById("demoBtn").textContent = L.demo;
+  document.getElementById("resetDayBtn").textContent = L.resetDay;
+  document.getElementById("dash_recent").textContent = L.recent;
+  document.getElementById("dash_chart").textContent = L.chart;
+
+  document.getElementById("temps_title").textContent = L.tempsTitle;
+  document.getElementById("temps_desc").textContent = L.tempsDesc;
+  document.getElementById("temps_kitchen").textContent = L.kitchen;
+  document.getElementById("temps_room").textContent = L.room;
+  document.getElementById("temps_save").textContent = L.saveTemps;
+
+  document.getElementById("clean_title").textContent = L.cleanTitle;
+  document.getElementById("clean_desc").textContent = L.cleanDesc;
+  document.getElementById("equip_title").textContent = L.equipTitle;
+  document.getElementById("equip_desc").textContent = L.equipDesc;
+
+  document.getElementById("expiry_title").textContent = L.expiryTitle;
+  document.getElementById("expiry_desc").textContent = L.expiryDesc;
+  document.getElementById("addExpiryBtn").textContent = L.addProduct;
+  document.getElementById("th_prod").textContent = L.product;
+  document.getElementById("th_open").textContent = L.open;
+  document.getElementById("th_exp").textContent = L.exp;
+  document.getElementById("th_status").textContent = L.status;
+  document.getElementById("th_act").textContent = L.actions;
+
+  document.getElementById("cook_title").textContent = L.cookTitle;
+  document.getElementById("cook_desc").textContent = L.cookDesc;
+  document.getElementById("cook_temp_core").textContent = L.core;
+  document.getElementById("cook_temp_core2").textContent = L.core;
+
+  document.getElementById("hist_title").textContent = L.histTitle;
+  document.getElementById("hist_desc").textContent = L.histDesc;
+  document.getElementById("hist_date").textContent = L.date;
+  document.getElementById("hist_time").textContent = L.time;
+  document.getElementById("hist_tempok").textContent = L.tempOk;
+  document.getElementById("hist_clean").textContent = L.clean;
+  document.getElementById("hist_expiry").textContent = L.histExp;
+  document.getElementById("hist_action").textContent = L.actions;
+
+  document.getElementById("set_title").textContent = L.setTitle;
+  document.getElementById("set_desc").textContent = L.setDesc;
+  document.getElementById("set_ranges").textContent = L.ranges;
+  document.getElementById("set_notes").textContent = L.notes;
+  document.getElementById("saveSettingsDay").textContent = L.saveDay;
+
+  document.getElementById("langSelect").value = state.language;
+}
+function setupLanguage(){
+  document.getElementById("langSelect").addEventListener("change", e=>{
+    state.language = e.target.value;
+    persist();
+    renderAll();
+  });
+}
+function setupSettings(){
+  const bind = (id, key)=> {
+    const el = document.getElementById(id);
+    el.value = state.ranges[key];
+    el.addEventListener("input", e=>{
+      state.ranges[key] = Number(e.target.value);
+      persist(); renderAll();
+    });
+  };
+  bind("rangeFridgeMin", "fridgeMin");
+  bind("rangeFridgeMax", "fridgeMax");
+  bind("rangeFreezerMax", "freezerMax");
+  bind("rangeChickenMin", "chickenMin");
+  bind("rangeSalmonMin", "salmonMin");
+}
+function renderSettingsValues(){
+  document.getElementById("rangeFridgeMin").value = state.ranges.fridgeMin;
+  document.getElementById("rangeFridgeMax").value = state.ranges.fridgeMax;
+  document.getElementById("rangeFreezerMax").value = state.ranges.freezerMax;
+  document.getElementById("rangeChickenMin").value = state.ranges.chickenMin;
+  document.getElementById("rangeSalmonMin").value = state.ranges.salmonMin;
+}
+function renderAll(){
+  setNowUI();
+  applyLanguage();
+  renderSelectedRecord();
+  renderStats();
+  renderAlerts();
+  renderHistory();
+  renderRecent();
+  renderChart();
+  renderSettingsValues();
+}
+function fillDemo(){
+  const rec = selectedRecord();
+  rec.temps = {
+    cellaVerdure: 3.1, lineaPrimi: 3.4, lineaSecondi: 4.8, frigoAntipasti: 2.9,
+    congelatoreCucina: -20.2, abbattitore: -19.0,
+    frigoViniRossi: 14.0, frigoViniBianchi: 5.5, congelatoreSala: -18.3,
+    frigoBevande: 3.8, cellaSottoBevande: 4.2
+  };
+  config.cleaning.forEach(x=> rec.cleaning[x] = true);
+  config.equipment.forEach(x=> rec.equipment[x] = {clean:true, ok:true});
+  rec.expiry = [
+    {name:"Salsa tonno", open:state.selectedDate, expiry:state.selectedDate},
+    {name:"Crema al basilico", open:state.selectedDate, expiry:addDays(state.selectedDate,2)}
+  ];
+  rec.cooking.chicken = 76;
+  rec.cooking.salmon = 58;
+  rec.notes = "Demo compilata.";
+  persist(); renderAll();
+}
+function addDays(dateStr, days){
+  const d = new Date(dateStr); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10);
+}
+function exportBackup(){
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `locoselli-haccp-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function importBackupFile(file){
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const parsed = JSON.parse(e.target.result);
+      if(!parsed.records) throw new Error("invalid");
+      state = {...defaultState(), ...parsed};
+      persist(); renderAll(); alert(labels[state.language].imported);
+    }catch(err){
+      alert(labels[state.language].importError);
+    }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById("backupBtn").addEventListener("click", exportBackup);
+document.getElementById("importBtn").addEventListener("click", ()=> document.getElementById("importFile").click());
+document.getElementById("importFile").addEventListener("change", e=>{
+  const file = e.target.files[0];
+  if(file) importBackupFile(file);
+});
+
+window.addExpiry = addExpiry;
+window.removeExpiry = removeExpiry;
+window.saveDayRecord = saveDayRecord;
+window.loadSelectedDay = loadSelectedDay;
+window.resetSelectedDay = resetSelectedDay;
+window.fillDemo = fillDemo;
+window.goDate = goDate;
+
+(function init(){
+  ensureRecord(state.selectedDate);
+  createTempRows();
+  createChecklists();
+  initTopInputs();
+  setupNav();
+  setupLanguage();
+  setupSettings();
+  attachCookingHandlers();
+  renderAll();
+})();
+</script>
+</body>
+</html>
