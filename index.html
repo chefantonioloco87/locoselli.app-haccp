@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Locoselli HACCP V8</title>
+  <title>Locoselli HACCP V9</title>
   <link rel="icon" href="logo.PNG">
   <link rel="apple-touch-icon" href="logo-apple.png">
   <style>
@@ -49,6 +49,8 @@
     .checkitem input{width:auto}
     table{width:100%;border-collapse:collapse}
     th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+    tr.history-row{cursor:pointer}
+    tr.history-row:active td, tr.history-row.selected td{background:#2a2f3b}
     .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--card2)}
     .status{margin-top:12px;padding:10px 12px;border-radius:12px;background:#14171d;border:1px solid var(--line);color:#e7ca8c}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
@@ -67,7 +69,7 @@
         <div class="logo"><img src="logo.PNG" alt="Locoselli" onerror="this.style.display='none'; this.parentNode.textContent='L';"></div>
         <div>
           <h1>Locoselli HACCP</h1>
-          <div class="muted">V8 semplificata e stabile</div>
+          <div class="muted">V9 · storico cliccabile senza tasto Carica</div>
         </div>
       </div>
       <div class="actions">
@@ -150,6 +152,7 @@
       <section id="history" class="section">
         <div class="panel">
           <h3>Storico</h3>
+          <div class="muted" style="margin-bottom:10px">Tocca direttamente la riga da caricare.</div>
           <div class="tablewrap">
             <table>
               <thead>
@@ -159,7 +162,6 @@
                   <th>Ora</th>
                   <th>Temp OK</th>
                   <th>Pulizie</th>
-                  <th>Azione</th>
                 </tr>
               </thead>
               <tbody id="historyBody"></tbody>
@@ -178,7 +180,7 @@
 
 <script>
 (function(){
-  const STORAGE_KEY = "locoselli_haccp_v8";
+  const STORAGE_KEY = "locoselli_haccp_v9";
 
   const tempKitchen = [
     {key:"cellaVerdure", label:"Frigo cella verdure", min:0, max:4},
@@ -232,11 +234,7 @@
 
   function saveState(msg){
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    if(msg) setStatus(msg);
-  }
-
-  function setStatus(msg){
-    document.getElementById("statusBox").textContent = msg;
+    if(msg) document.getElementById("statusBox").textContent = msg;
   }
 
   function ensureDate(date){
@@ -354,7 +352,7 @@
       const label1 = document.createElement("label");
       label1.style.fontSize = "12px";
       label1.style.color = "#b4ac9d";
-      label1.innerHTML = 'Pulito ';
+      label1.textContent = "Pulito ";
       const cb1 = document.createElement("input");
       cb1.type = "checkbox";
       cb1.checked = !!slot.equipment[name].clean;
@@ -363,7 +361,7 @@
       label2.style.fontSize = "12px";
       label2.style.color = "#b4ac9d";
       label2.style.marginLeft = "8px";
-      label2.innerHTML = 'OK ';
+      label2.textContent = "OK ";
       const cb2 = document.createElement("input");
       cb2.type = "checkbox";
       cb2.checked = !!slot.equipment[name].ok;
@@ -389,8 +387,7 @@
   }
 
   function renderNotes(){
-    const ta = document.getElementById("notesInput");
-    ta.value = currentSlot().notes || "";
+    document.getElementById("notesInput").value = currentSlot().notes || "";
   }
 
   function renderHistory(){
@@ -401,6 +398,10 @@
       ["morning","evening"].forEach(shift => {
         const slot = ensureDate(date)[shift];
         const tr = document.createElement("tr");
+        tr.className = "history-row";
+        tr.dataset.date = date;
+        tr.dataset.shift = shift;
+        if(state.selectedDate === date && state.selectedShift === shift) tr.classList.add("selected");
 
         const tdDate = document.createElement("td");
         tdDate.textContent = date;
@@ -417,30 +418,28 @@
         const tdClean = document.createElement("td");
         tdClean.textContent = String(countCleaning(slot));
 
-        const tdAction = document.createElement("td");
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.textContent = "Carica";
-        btn.addEventListener("click", () => {
-          state.selectedDate = date;
-          state.selectedShift = shift;
-          document.getElementById("dateInput").value = date;
-          document.getElementById("shiftInput").value = shift;
-          document.getElementById("timeInput").value = ensureDate(date)[shift].time || "";
-          renderAll();
-          setStatus("Caricato: " + date + " · " + (shift === "morning" ? "Mattina" : "Sera"));
-        });
-        tdAction.appendChild(btn);
-
         tr.appendChild(tdDate);
         tr.appendChild(tdShift);
         tr.appendChild(tdTime);
         tr.appendChild(tdTemp);
         tr.appendChild(tdClean);
-        tr.appendChild(tdAction);
         body.appendChild(tr);
       });
     });
+  }
+
+  function loadRow(date, shift){
+    state.selectedDate = date;
+    state.selectedShift = shift;
+    document.getElementById("dateInput").value = date;
+    document.getElementById("shiftInput").value = shift;
+    document.getElementById("timeInput").value = ensureDate(date)[shift].time || "";
+    renderAll();
+    document.querySelectorAll(".navbtn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.querySelector('.navbtn[data-target="temperature"]').classList.add("active");
+    document.getElementById("temperature").classList.add("active");
+    document.getElementById("statusBox").textContent = "Caricato: " + date + " · " + (shift === "morning" ? "Mattina" : "Sera");
   }
 
   function renderAll(){
@@ -508,6 +507,18 @@
     });
   });
 
+  document.getElementById("historyBody").addEventListener("click", e => {
+    const row = e.target.closest("tr.history-row");
+    if(!row) return;
+    loadRow(row.dataset.date, row.dataset.shift);
+  });
+
+  document.getElementById("historyBody").addEventListener("touchend", e => {
+    const row = e.target.closest("tr.history-row");
+    if(!row) return;
+    loadRow(row.dataset.date, row.dataset.shift);
+  }, {passive:true});
+
   document.getElementById("exportBtn").addEventListener("click", () => {
     const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
     const a = document.createElement("a");
@@ -531,7 +542,7 @@
         saveState("Backup importato");
         renderAll();
       }catch(err){
-        setStatus("Backup non valido");
+        document.getElementById("statusBox").textContent = "Backup non valido";
       }
     };
     reader.readAsText(file);
