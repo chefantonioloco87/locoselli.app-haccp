@@ -1,277 +1,544 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Locoselli HACCP V7</title>
-<meta name="theme-color" content="#111111" />
-<link rel="icon" href="logo.PNG" />
-<link rel="apple-touch-icon" href="logo-apple.png" />
-<style>
-:root{--bg:#0f1013;--panel:#17181d;--panel2:#20222a;--line:#30323b;--text:#f5f1e8;--muted:#b8b0a1;--gold:#c9a45c;--bad:#b83a3a;--ok:#1d8f4d}
-*{box-sizing:border-box}
-body{margin:0;padding:16px;background:linear-gradient(180deg,#0b0c0f,#14161b);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
-.app{max-width:1200px;margin:0 auto}
-.hero,.card{background:var(--panel);border:1px solid var(--line);border-radius:20px}
-.hero{padding:18px}
-.top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
-.brand{display:flex;align-items:center;gap:14px}
-.logo{width:58px;height:58px;border-radius:16px;overflow:hidden;border:1px solid rgba(201,164,92,.3);display:flex;align-items:center;justify-content:center;background:#111}
-.logo img{width:100%;height:100%;object-fit:cover}
-h1{margin:0;color:#e6c989}
-h2{margin:0 0 12px 0}
-.muted{color:var(--muted)}
-.toolbar{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:12px;margin-top:14px}
-.tile{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:12px}
-.tile h3{margin:0 0 8px 0;font-size:13px;color:var(--muted)}
-input,select,button,textarea{font:inherit;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}
-input,select,textarea{width:100%;padding:10px 12px}
-button{padding:10px 14px;cursor:pointer}
-.gold{background:linear-gradient(180deg,#c9a45c,#ad8540);color:#111;border:none;font-weight:700}
-.layout{display:grid;grid-template-columns:300px 1fr;gap:16px;margin-top:16px}
-.side,.main{background:var(--panel);border:1px solid var(--line);border-radius:20px}
-.side{padding:12px}
-.nav{display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;color:var(--text);padding:12px;border-radius:14px}
-.nav.active{background:#1d1f26;border-color:rgba(201,164,92,.25);color:#e6c989}
-.nav+.nav{margin-top:8px}
-.main{padding:16px}
-.section{display:none}
-.section.active{display:block}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.row{display:grid;grid-template-columns:1fr 110px auto;gap:10px;align-items:center;margin:10px 0}
-.chip{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid var(--line)}
-.ok{background:rgba(29,143,77,.16);color:#9ef0bf;border-color:rgba(29,143,77,.35)}
-.bad{background:rgba(184,58,58,.16);color:#ffb1b1;border-color:rgba(184,58,58,.35)}
-.check{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.checkitem{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px}
-.checkitem input{width:auto}
-table{width:100%;border-collapse:collapse}
-th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
-.table{overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.status{margin-top:12px;padding:10px 12px;border-radius:12px;background:#15161b;border:1px solid var(--line);color:#e6c989}
-textarea{min-height:90px}
-@media (max-width:900px){.toolbar,.layout,.grid2,.check{grid-template-columns:1fr}.row{grid-template-columns:1fr 110px}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Locoselli HACCP V8</title>
+  <link rel="icon" href="logo.PNG">
+  <link rel="apple-touch-icon" href="logo-apple.png">
+  <style>
+    :root{
+      --bg:#111318; --card:#1b1e25; --card2:#232733; --line:#343949; --text:#f3efe7; --muted:#b4ac9d; --gold:#c9a45c;
+      --ok:#1f8b4d; --bad:#b43c3c;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#0d0f13,#171a21);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;padding:14px}
+    .app{max-width:1100px;margin:0 auto}
+    .hero,.panel{background:var(--card);border:1px solid var(--line);border-radius:18px}
+    .hero{padding:16px}
+    .top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:56px;height:56px;border-radius:14px;overflow:hidden;background:#111;border:1px solid rgba(201,164,92,.28);display:flex;align-items:center;justify-content:center}
+    .logo img{width:100%;height:100%;object-fit:cover}
+    h1{margin:0;color:#e7ca8c;font-size:28px}
+    .muted{color:var(--muted)}
+    .toolbar{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-top:14px}
+    .tile{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:10px}
+    .tile h3{margin:0 0 8px 0;font-size:13px;color:var(--muted)}
+    input,select,button,textarea{font:inherit}
+    input,select,textarea{width:100%;padding:10px 11px;border-radius:12px;border:1px solid var(--line);background:#171a21;color:var(--text)}
+    button{padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--text);cursor:pointer}
+    .gold{background:linear-gradient(180deg,#d3b06a,#af8944);color:#111;border:none;font-weight:700}
+    .layout{display:grid;grid-template-columns:280px 1fr;gap:14px;margin-top:14px}
+    .side,.main{background:var(--card);border:1px solid var(--line);border-radius:18px}
+    .side{padding:10px}
+    .navbtn{display:block;width:100%;text-align:left;padding:12px;border-radius:12px;border:1px solid transparent;background:transparent;color:var(--text)}
+    .navbtn.active{background:var(--card2);border-color:rgba(201,164,92,.25);color:#e7ca8c}
+    .navbtn+.navbtn{margin-top:8px}
+    .main{padding:14px}
+    .section{display:none}
+    .section.active{display:block}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .panel{padding:12px}
+    .row{display:grid;grid-template-columns:1fr 110px 120px;gap:10px;align-items:center;margin:10px 0}
+    .chip{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px}
+    .ok{background:rgba(31,139,77,.16);border-color:rgba(31,139,77,.35);color:#9ae3b6}
+    .bad{background:rgba(180,60,60,.16);border-color:rgba(180,60,60,.35);color:#ffb8b8}
+    .checkgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .checkitem{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:11px;border-radius:12px;background:var(--card2);border:1px solid var(--line)}
+    .checkitem input{width:auto}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+    .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--card2)}
+    .status{margin-top:12px;padding:10px 12px;border-radius:12px;background:#14171d;border:1px solid var(--line);color:#e7ca8c}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    textarea{min-height:110px}
+    @media (max-width:900px){
+      .toolbar,.layout,.grid2,.checkgrid{grid-template-columns:1fr}
+      .row{grid-template-columns:1fr 110px 120px}
+    }
+  </style>
 </head>
 <body>
 <div class="app">
-<div class="hero">
-<div class="top">
-<div class="brand">
-<div class="logo"><img src="logo.PNG" alt="Locoselli" onerror="this.style.display='none'; this.parentNode.textContent='L';"></div>
-<div><h1>Locoselli HACCP</h1><div class="muted">Versione V7 stabile · salvataggio separato mattina / sera</div></div>
-</div>
-<div class="actions">
-<button onclick="exportBackup()">Esporta backup</button>
-<button onclick="document.getElementById('importFile').click()">Importa backup</button>
-<input id="importFile" type="file" accept=".json" hidden>
-<button class="gold" onclick="window.print()">Stampa / PDF</button>
-</div>
-</div>
-<div class="toolbar">
-<div class="tile"><h3>Oggi</h3><div id="todayText"></div></div>
-<div class="tile"><h3>Data controllo</h3><input id="recordDate" type="date"></div>
-<div class="tile"><h3>Ora controllo</h3><input id="recordTime" type="time"></div>
-<div class="tile"><h3>Turno</h3><select id="recordShift"><option value="morning">Mattina</option><option value="evening">Sera</option></select></div>
-</div>
-<div class="status" id="saveStatus">Pronto.</div>
+  <div class="hero">
+    <div class="top">
+      <div class="brand">
+        <div class="logo"><img src="logo.PNG" alt="Locoselli" onerror="this.style.display='none'; this.parentNode.textContent='L';"></div>
+        <div>
+          <h1>Locoselli HACCP</h1>
+          <div class="muted">V8 semplificata e stabile</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" id="exportBtn">Esporta backup</button>
+        <button type="button" id="importBtn">Importa backup</button>
+        <input type="file" id="importFile" accept=".json" hidden>
+        <button type="button" class="gold" onclick="window.print()">Stampa / PDF</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="tile">
+        <h3>Oggi</h3>
+        <div id="todayLabel"></div>
+      </div>
+      <div class="tile">
+        <h3>Data controllo</h3>
+        <input type="date" id="dateInput">
+      </div>
+      <div class="tile">
+        <h3>Ora controllo</h3>
+        <input type="time" id="timeInput">
+      </div>
+      <div class="tile">
+        <h3>Turno</h3>
+        <select id="shiftInput">
+          <option value="morning">Mattina</option>
+          <option value="evening">Sera</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="status" id="statusBox">Pronto.</div>
+  </div>
+
+  <div class="layout">
+    <div class="side">
+      <button type="button" class="navbtn active" data-target="temperature">🌡️ Temperature</button>
+      <button type="button" class="navbtn" data-target="cleaning">🧼 Pulizie</button>
+      <button type="button" class="navbtn" data-target="equipment">⚙️ Attrezzature</button>
+      <button type="button" class="navbtn" data-target="notes">📝 Note</button>
+      <button type="button" class="navbtn" data-target="history">📚 Storico</button>
+    </div>
+
+    <div class="main">
+      <section id="temperature" class="section active">
+        <div class="grid2">
+          <div class="panel">
+            <h3>Cucina</h3>
+            <div id="tempsKitchen"></div>
+          </div>
+          <div class="panel">
+            <h3>Sala / Bar</h3>
+            <div id="tempsRoom"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cleaning" class="section">
+        <div class="panel">
+          <h3>Pulizie</h3>
+          <div id="cleaningGrid" class="checkgrid"></div>
+        </div>
+      </section>
+
+      <section id="equipment" class="section">
+        <div class="panel">
+          <h3>Attrezzature</h3>
+          <div id="equipmentGrid" class="checkgrid"></div>
+        </div>
+      </section>
+
+      <section id="notes" class="section">
+        <div class="panel">
+          <h3>Note</h3>
+          <textarea id="notesInput" placeholder="Note, problemi, azioni correttive..."></textarea>
+        </div>
+      </section>
+
+      <section id="history" class="section">
+        <div class="panel">
+          <h3>Storico</h3>
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Turno</th>
+                  <th>Ora</th>
+                  <th>Temp OK</th>
+                  <th>Pulizie</th>
+                  <th>Azione</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button type="button" class="gold" id="saveBtn">Salva turno</button>
+        <button type="button" id="resetBtn">Azzera turno</button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="layout">
-<div class="side">
-<button class="nav active" data-target="temps">🌡️ Temperature</button>
-<button class="nav" data-target="clean">🧼 Pulizie</button>
-<button class="nav" data-target="equip">⚙️ Attrezzature</button>
-<button class="nav" data-target="expiry">📦 Scadenze</button>
-<button class="nav" data-target="notes">📝 Note</button>
-<button class="nav" data-target="history">📚 Storico</button>
-</div>
-
-<div class="main">
-<section class="section active" id="temps"><h2>Temperature</h2><div class="grid2"><div class="card" style="padding:14px"><h3>Cucina</h3><div id="tempsKitchen"></div></div><div class="card" style="padding:14px"><h3>Sala / Bar</h3><div id="tempsRoom"></div></div></div></section>
-<section class="section" id="clean"><h2>Pulizie</h2><div class="check" id="cleanGrid"></div></section>
-<section class="section" id="equip"><h2>Attrezzature</h2><div class="check" id="equipGrid"></div></section>
-<section class="section" id="expiry"><h2>Scadenze</h2><div class="grid2"><input id="expName" type="text" placeholder="Nome prodotto"><div class="grid2"><input id="expOpen" type="date"><input id="expDate" type="date"></div></div><div class="actions"><button class="gold" onclick="addExpiry()">Aggiungi prodotto</button></div><div class="table" style="margin-top:12px"><table><thead><tr><th>Prodotto</th><th>Apertura</th><th>Scadenza</th><th>Stato</th><th></th></tr></thead><tbody id="expiryBody"></tbody></table></div></section>
-<section class="section" id="notes"><h2>Note</h2><textarea id="notesText" placeholder="Note, problemi, azioni correttive..."></textarea></section>
-<section class="section" id="history"><h2>Storico</h2><div class="table"><table><thead><tr><th>Data</th><th>Turno</th><th>Ora</th><th>Temp OK</th><th>Pulizie</th><th></th></tr></thead><tbody id="historyBody"></tbody></table></div></section>
-<div class="actions"><button class="gold" onclick="saveCurrent()">Salva</button><button onclick="resetCurrent()">Azzera questo turno</button></div>
-</div>
-</div>
-</div>
 <script>
-const KEY="locoselli_haccp_v7";
-const TEMP_ITEMS={
-kitchen:[
-{key:"cellaVerdure",label:"Frigo cella verdure",min:0,max:4},
-{key:"lineaPrimi",label:"Frigo linea primi",min:0,max:4},
-{key:"lineaSecondi",label:"Frigo linea secondi",min:0,max:4},
-{key:"frigoAntipasti",label:"Frigo antipasti",min:0,max:4},
-{key:"congelatoreCucina",label:"Congelatore cucina",max:-18,freezer:true},
-{key:"abbattitore",label:"Abbattitore",max:-18,freezer:true}],
-room:[
-{key:"frigoViniRossi",label:"Frigo vini rossi",min:12,max:18},
-{key:"frigoViniBianchi",label:"Frigo vini bianchi",min:4,max:8},
-{key:"congelatoreSala",label:"Congelatore sala",max:-18,freezer:true},
-{key:"frigoBevande",label:"Frigo bevande",min:0,max:4},
-{key:"cellaSottoBevande",label:"Cella sotto bevande",min:0,max:4}]};
-const CLEAN_ITEMS=["Bagno sopra","Bagno sotto","Bagno personale","Pavimenti","Finestre","Scaffali","Tavoli","Superfici lavoro","Celle e frigo"];
-const EQUIP_ITEMS=["Bollitore","Cuocipasta","Griglia","Cappa","Forno ventilato","Thermomix 1","Thermomix 2","Planetaria","Macchina caffè","Scaffali fuori"];
-function emptySlot(){const temps={};[...TEMP_ITEMS.kitchen,...TEMP_ITEMS.room].forEach(i=>temps[i.key]="");const cleaning={};CLEAN_ITEMS.forEach(i=>cleaning[i]=false);const equipment={};EQUIP_ITEMS.forEach(i=>equipment[i]={clean:false,ok:false});return{time:"",temps,cleaning,equipment,expiry:[],notes:""}}
-function defaultState(){const now=new Date();return{selectedDate:now.toISOString().slice(0,10),selectedTime:now.toTimeString().slice(0,5),selectedShift:"morning",records:{}}}
-let state=loadState();
-function loadState(){try{const raw=localStorage.getItem(KEY);if(!raw)return defaultState();return {...defaultState(),...JSON.parse(raw)}}catch(e){return defaultState()}}
-function persist(msg){localStorage.setItem(KEY,JSON.stringify(state));if(msg)setStatus(msg)}
-function ensureDay(date){if(!state.records[date])state.records[date]={morning:emptySlot(),evening:emptySlot()};if(!state.records[date].morning)state.records[date].morning=emptySlot();if(!state.records[date].evening)state.records[date].evening=emptySlot();return state.records[date]}
-function currentSlot(){const day=ensureDay(state.selectedDate);return day[state.selectedShift]}
-function setStatus(text){document.getElementById("saveStatus").textContent=text}
-function classify(item,value){if(value===""||isNaN(Number(value)))return{text:"—",cls:""};const v=Number(value);if(item.freezer)return v<=item.max?{text:"OK",cls:"ok"}:{text:"Fuori range",cls:"bad"};return (v>=item.min&&v<=item.max)?{text:"OK",cls:"ok"}:{text:"Fuori range",cls:"bad"}}
+(function(){
+  const STORAGE_KEY = "locoselli_haccp_v8";
 
-function renderTemps(){
-  function renderGroup(items,target){
-    const box=document.getElementById(target); box.innerHTML="";
-    const slot=currentSlot();
-    items.forEach(item=>{
-      const row=document.createElement("div");
-      row.className="row";
-      row.innerHTML=`<label>${item.label}</label><input type="number" step="0.1" id="${item.key}" value="${slot.temps[item.key]??""}" placeholder="°C"><span class="chip" id="${item.key}_status">—</span>`;
-      box.appendChild(row);
-      const input=row.querySelector("input");
-      const chip=row.querySelector("span");
-      const apply=()=>{
-        slot.temps[item.key]=input.value;
-        const c=classify(item,input.value);
-        chip.textContent=c.text;
-        chip.className="chip "+(c.cls||"");
-        autoSave("Temperatura aggiornata");
-      };
-      input.addEventListener("input",apply);
-      apply();
+  const tempKitchen = [
+    {key:"cellaVerdure", label:"Frigo cella verdure", min:0, max:4},
+    {key:"lineaPrimi", label:"Frigo linea primi", min:0, max:4},
+    {key:"lineaSecondi", label:"Frigo linea secondi", min:0, max:4},
+    {key:"frigoAntipasti", label:"Frigo antipasti", min:0, max:4},
+    {key:"congelatoreCucina", label:"Congelatore cucina", max:-18, freezer:true},
+    {key:"abbattitore", label:"Abbattitore", max:-18, freezer:true}
+  ];
+  const tempRoom = [
+    {key:"frigoViniRossi", label:"Frigo vini rossi", min:12, max:18},
+    {key:"frigoViniBianchi", label:"Frigo vini bianchi", min:4, max:8},
+    {key:"congelatoreSala", label:"Congelatore sala", max:-18, freezer:true},
+    {key:"frigoBevande", label:"Frigo bevande", min:0, max:4},
+    {key:"cellaSottoBevande", label:"Cella sotto bevande", min:0, max:4}
+  ];
+  const cleaningItems = ["Bagno sopra","Bagno sotto","Bagno personale","Pavimenti","Finestre","Scaffali","Tavoli","Superfici lavoro","Celle e frigo"];
+  const equipmentItems = ["Bollitore","Cuocipasta","Griglia","Cappa","Forno ventilato","Thermomix 1","Thermomix 2","Planetaria","Macchina caffè","Scaffali fuori"];
+
+  function emptySlot(){
+    const temps = {};
+    [...tempKitchen, ...tempRoom].forEach(t => temps[t.key] = "");
+    const cleaning = {};
+    cleaningItems.forEach(i => cleaning[i] = false);
+    const equipment = {};
+    equipmentItems.forEach(i => equipment[i] = {clean:false, ok:false});
+    return {time:"", temps, cleaning, equipment, notes:""};
+  }
+
+  function defaultState(){
+    const now = new Date();
+    return {
+      selectedDate: now.toISOString().slice(0,10),
+      selectedTime: now.toTimeString().slice(0,5),
+      selectedShift: "morning",
+      records: {}
+    };
+  }
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      return Object.assign(defaultState(), JSON.parse(raw));
+    }catch(e){
+      return defaultState();
+    }
+  }
+
+  let state = loadState();
+
+  function saveState(msg){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if(msg) setStatus(msg);
+  }
+
+  function setStatus(msg){
+    document.getElementById("statusBox").textContent = msg;
+  }
+
+  function ensureDate(date){
+    if(!state.records[date]){
+      state.records[date] = {morning: emptySlot(), evening: emptySlot()};
+    }
+    if(!state.records[date].morning) state.records[date].morning = emptySlot();
+    if(!state.records[date].evening) state.records[date].evening = emptySlot();
+    return state.records[date];
+  }
+
+  function currentSlot(){
+    return ensureDate(state.selectedDate)[state.selectedShift];
+  }
+
+  function classify(item, value){
+    if(value === "" || isNaN(Number(value))) return {text:"—", cls:""};
+    const v = Number(value);
+    if(item.freezer) return v <= item.max ? {text:"OK", cls:"ok"} : {text:"Fuori range", cls:"bad"};
+    return (v >= item.min && v <= item.max) ? {text:"OK", cls:"ok"} : {text:"Fuori range", cls:"bad"};
+  }
+
+  function countTempOk(slot){
+    return [...tempKitchen, ...tempRoom].filter(item => classify(item, slot.temps[item.key]).cls === "ok").length;
+  }
+
+  function countCleaning(slot){
+    return Object.values(slot.cleaning).filter(Boolean).length;
+  }
+
+  function buildTemperatureRows(items, targetId){
+    const box = document.getElementById(targetId);
+    box.innerHTML = "";
+    const slot = currentSlot();
+
+    items.forEach(item => {
+      const wrap = document.createElement("div");
+      wrap.className = "row";
+
+      const label = document.createElement("label");
+      label.textContent = item.label;
+
+      const input = document.createElement("input");
+      input.type = "number";
+      input.step = "0.1";
+      input.value = slot.temps[item.key] || "";
+      input.placeholder = "°C";
+
+      const chip = document.createElement("span");
+      chip.className = "chip";
+
+      function refreshChip(){
+        const res = classify(item, input.value);
+        chip.textContent = res.text;
+        chip.className = "chip " + (res.cls || "");
+      }
+
+      input.addEventListener("input", () => {
+        slot.temps[item.key] = input.value;
+        saveState("Temperatura aggiornata · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+        refreshChip();
+        renderHistory();
+      });
+
+      refreshChip();
+
+      wrap.appendChild(label);
+      wrap.appendChild(input);
+      wrap.appendChild(chip);
+      box.appendChild(wrap);
     });
   }
-  renderGroup(TEMP_ITEMS.kitchen,"tempsKitchen");
-  renderGroup(TEMP_ITEMS.room,"tempsRoom");
-}
-function renderClean(){
-  const box=document.getElementById("cleanGrid"); const slot=currentSlot(); box.innerHTML="";
-  CLEAN_ITEMS.forEach(name=>{
-    const d=document.createElement("div");
-    d.className="checkitem";
-    d.innerHTML=`<span>${name}</span><input type="checkbox" ${slot.cleaning[name]?"checked":""}>`;
-    const cb=d.querySelector("input");
-    cb.addEventListener("change",()=>{slot.cleaning[name]=cb.checked; autoSave("Pulizia aggiornata")});
-    box.appendChild(d);
-  });
-}
-function renderEquip(){
-  const box=document.getElementById("equipGrid"); const slot=currentSlot(); box.innerHTML="";
-  EQUIP_ITEMS.forEach(name=>{
-    const d=document.createElement("div");
-    d.className="checkitem";
-    d.innerHTML=`<span>${name}</span><div><label style="font-size:12px;color:#b8b0a1">Pulito <input type="checkbox" class="c1" ${slot.equipment[name].clean?"checked":""}></label><label style="font-size:12px;color:#b8b0a1;margin-left:8px">OK <input type="checkbox" class="c2" ${slot.equipment[name].ok?"checked":""}></label></div>`;
-    d.querySelector(".c1").addEventListener("change",e=>{slot.equipment[name].clean=e.target.checked; autoSave("Attrezzatura aggiornata")});
-    d.querySelector(".c2").addEventListener("change",e=>{slot.equipment[name].ok=e.target.checked; autoSave("Attrezzatura aggiornata")});
-    box.appendChild(d);
-  });
-}
-function renderExpiry(){
-  const body=document.getElementById("expiryBody"); const slot=currentSlot(); body.innerHTML="";
-  slot.expiry.forEach((item,idx)=>{
-    const tr=document.createElement("tr");
-    let status='<span class="chip ok">OK</span>';
-    if(item.expiry){
-      const diff=Math.ceil((new Date(item.expiry)-new Date(state.selectedDate))/(1000*60*60*24));
-      if(diff<0) status='<span class="chip bad">Scaduto</span>';
-      else if(diff<=2) status='<span class="chip">In scadenza</span>';
-    }
-    tr.innerHTML=`<td>${item.name}</td><td>${item.open||""}</td><td>${item.expiry||""}</td><td>${status}</td><td><button onclick="removeExpiry(${idx})">Elimina</button></td>`;
-    body.appendChild(tr);
-  });
-}
-function addExpiry(){
-  const name=document.getElementById("expName").value.trim();
-  const open=document.getElementById("expOpen").value;
-  const expiry=document.getElementById("expDate").value;
-  if(!name) return;
-  currentSlot().expiry.push({name,open,expiry});
-  document.getElementById("expName").value="";
-  document.getElementById("expOpen").value="";
-  document.getElementById("expDate").value="";
-  persist("Prodotto aggiunto");
-  renderExpiry(); renderHistory();
-}
-function removeExpiry(idx){
-  currentSlot().expiry.splice(idx,1);
-  persist("Prodotto eliminato");
-  renderExpiry(); renderHistory();
-}
-function renderNotes(){document.getElementById("notesText").value=currentSlot().notes||""}
-function attachNotes(){document.getElementById("notesText").addEventListener("input",e=>{currentSlot().notes=e.target.value; autoSave("Note aggiornate")})}
-function countTempOk(slot){return [...TEMP_ITEMS.kitchen,...TEMP_ITEMS.room].filter(item=>classify(item,slot.temps[item.key]).cls==="ok").length}
-function countCleaning(slot){return Object.values(slot.cleaning).filter(Boolean).length}
-function renderHistory(){
-  const body=document.getElementById("historyBody"); body.innerHTML="";
-  Object.keys(state.records).sort().reverse().forEach(date=>{
-    ["morning","evening"].forEach(shift=>{
-      const slot=ensureDay(date)[shift];
-      const tr=document.createElement("tr");
-      tr.innerHTML=`<td>${date}</td><td>${shift==="morning"?"Mattina":"Sera"}</td><td>${slot.time||""}</td><td>${countTempOk(slot)}</td><td>${countCleaning(slot)}</td><td><button onclick="loadHistory('${date}','${shift}')">Carica</button></td>`;
-      body.appendChild(tr);
+
+  function renderCleaning(){
+    const box = document.getElementById("cleaningGrid");
+    box.innerHTML = "";
+    const slot = currentSlot();
+
+    cleaningItems.forEach(name => {
+      const item = document.createElement("div");
+      item.className = "checkitem";
+
+      const span = document.createElement("span");
+      span.textContent = name;
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = !!slot.cleaning[name];
+      cb.addEventListener("change", () => {
+        slot.cleaning[name] = cb.checked;
+        saveState("Pulizia aggiornata · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+        renderHistory();
+      });
+
+      item.appendChild(span);
+      item.appendChild(cb);
+      box.appendChild(item);
     });
+  }
+
+  function renderEquipment(){
+    const box = document.getElementById("equipmentGrid");
+    box.innerHTML = "";
+    const slot = currentSlot();
+
+    equipmentItems.forEach(name => {
+      const item = document.createElement("div");
+      item.className = "checkitem";
+
+      const span = document.createElement("span");
+      span.textContent = name;
+
+      const controls = document.createElement("div");
+
+      const label1 = document.createElement("label");
+      label1.style.fontSize = "12px";
+      label1.style.color = "#b4ac9d";
+      label1.innerHTML = 'Pulito ';
+      const cb1 = document.createElement("input");
+      cb1.type = "checkbox";
+      cb1.checked = !!slot.equipment[name].clean;
+
+      const label2 = document.createElement("label");
+      label2.style.fontSize = "12px";
+      label2.style.color = "#b4ac9d";
+      label2.style.marginLeft = "8px";
+      label2.innerHTML = 'OK ';
+      const cb2 = document.createElement("input");
+      cb2.type = "checkbox";
+      cb2.checked = !!slot.equipment[name].ok;
+
+      cb1.addEventListener("change", () => {
+        slot.equipment[name].clean = cb1.checked;
+        saveState("Attrezzatura aggiornata · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+      });
+      cb2.addEventListener("change", () => {
+        slot.equipment[name].ok = cb2.checked;
+        saveState("Attrezzatura aggiornata · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+      });
+
+      label1.appendChild(cb1);
+      label2.appendChild(cb2);
+      controls.appendChild(label1);
+      controls.appendChild(label2);
+
+      item.appendChild(span);
+      item.appendChild(controls);
+      box.appendChild(item);
+    });
+  }
+
+  function renderNotes(){
+    const ta = document.getElementById("notesInput");
+    ta.value = currentSlot().notes || "";
+  }
+
+  function renderHistory(){
+    const body = document.getElementById("historyBody");
+    body.innerHTML = "";
+
+    Object.keys(state.records).sort().reverse().forEach(date => {
+      ["morning","evening"].forEach(shift => {
+        const slot = ensureDate(date)[shift];
+        const tr = document.createElement("tr");
+
+        const tdDate = document.createElement("td");
+        tdDate.textContent = date;
+
+        const tdShift = document.createElement("td");
+        tdShift.textContent = shift === "morning" ? "Mattina" : "Sera";
+
+        const tdTime = document.createElement("td");
+        tdTime.textContent = slot.time || "";
+
+        const tdTemp = document.createElement("td");
+        tdTemp.textContent = String(countTempOk(slot));
+
+        const tdClean = document.createElement("td");
+        tdClean.textContent = String(countCleaning(slot));
+
+        const tdAction = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "Carica";
+        btn.addEventListener("click", () => {
+          state.selectedDate = date;
+          state.selectedShift = shift;
+          document.getElementById("dateInput").value = date;
+          document.getElementById("shiftInput").value = shift;
+          document.getElementById("timeInput").value = ensureDate(date)[shift].time || "";
+          renderAll();
+          setStatus("Caricato: " + date + " · " + (shift === "morning" ? "Mattina" : "Sera"));
+        });
+        tdAction.appendChild(btn);
+
+        tr.appendChild(tdDate);
+        tr.appendChild(tdShift);
+        tr.appendChild(tdTime);
+        tr.appendChild(tdTemp);
+        tr.appendChild(tdClean);
+        tr.appendChild(tdAction);
+        body.appendChild(tr);
+      });
+    });
+  }
+
+  function renderAll(){
+    ensureDate(state.selectedDate);
+    document.getElementById("dateInput").value = state.selectedDate;
+    document.getElementById("timeInput").value = currentSlot().time || state.selectedTime || "";
+    document.getElementById("shiftInput").value = state.selectedShift;
+    buildTemperatureRows(tempKitchen, "tempsKitchen");
+    buildTemperatureRows(tempRoom, "tempsRoom");
+    renderCleaning();
+    renderEquipment();
+    renderNotes();
+    renderHistory();
+  }
+
+  function resetCurrent(){
+    ensureDate(state.selectedDate)[state.selectedShift] = emptySlot();
+    saveState("Turno azzerato · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+    renderAll();
+  }
+
+  document.getElementById("todayLabel").textContent = new Date().toLocaleDateString("it-IT", {
+    weekday:"long", day:"2-digit", month:"long", year:"numeric"
   });
-}
-function loadHistory(date,shift){
-  state.selectedDate=date;
-  state.selectedShift=shift;
-  document.getElementById("recordDate").value=date;
-  document.getElementById("recordShift").value=shift;
-  document.getElementById("recordTime").value=ensureDay(date)[shift].time||"";
-  renderAll();
-  setStatus("Caricato: "+date+" · "+(shift==="morning"?"Mattina":"Sera"));
-}
-function autoSave(msg){
-  currentSlot().time=document.getElementById("recordTime").value||state.selectedTime;
-  persist(msg+" · "+state.selectedDate+" · "+(state.selectedShift==="morning"?"Mattina":"Sera"));
-  renderHistory();
-}
-function saveCurrent(){autoSave("Salvato")}
-function resetCurrent(){ensureDay(state.selectedDate)[state.selectedShift]=emptySlot(); renderAll(); persist("Turno azzerato")}
-function exportBackup(){
-  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob); a.download="locoselli-haccp-backup.json"; a.click(); URL.revokeObjectURL(a.href);
-}
-document.getElementById("importFile").addEventListener("change",e=>{
-  const f=e.target.files[0]; if(!f) return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    try{state={...defaultState(),...JSON.parse(ev.target.result)}; persist("Backup importato"); renderAll();}
-    catch(err){setStatus("Backup non valido")}
-  };
-  reader.readAsText(f);
-});
-function initTop(){
-  const now=new Date();
-  document.getElementById("todayText").textContent=now.toLocaleDateString("it-IT",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
-  document.getElementById("recordDate").value=state.selectedDate;
-  document.getElementById("recordTime").value=state.selectedTime;
-  document.getElementById("recordShift").value=state.selectedShift;
-  document.getElementById("recordDate").addEventListener("change",e=>{state.selectedDate=e.target.value; ensureDay(state.selectedDate); document.getElementById("recordTime").value=currentSlot().time||""; persist("Data cambiata"); renderAll();});
-  document.getElementById("recordTime").addEventListener("change",e=>{state.selectedTime=e.target.value; currentSlot().time=e.target.value; persist("Ora aggiornata"); renderHistory();});
-  document.getElementById("recordShift").addEventListener("change",e=>{state.selectedShift=e.target.value; document.getElementById("recordTime").value=currentSlot().time||""; persist("Turno cambiato"); renderAll();});
-}
-function setupNav(){
-  document.querySelectorAll(".nav").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      document.querySelectorAll(".nav").forEach(b=>b.classList.remove("active"));
-      document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+
+  document.getElementById("dateInput").addEventListener("change", e => {
+    state.selectedDate = e.target.value;
+    ensureDate(state.selectedDate);
+    renderAll();
+    saveState("Data cambiata");
+  });
+
+  document.getElementById("timeInput").addEventListener("change", e => {
+    state.selectedTime = e.target.value;
+    currentSlot().time = e.target.value;
+    saveState("Ora aggiornata · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+    renderHistory();
+  });
+
+  document.getElementById("shiftInput").addEventListener("change", e => {
+    state.selectedShift = e.target.value;
+    renderAll();
+    saveState("Turno cambiato");
+  });
+
+  document.getElementById("notesInput").addEventListener("input", e => {
+    currentSlot().notes = e.target.value;
+    saveState("Note aggiornate · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+  });
+
+  document.getElementById("saveBtn").addEventListener("click", () => {
+    currentSlot().time = document.getElementById("timeInput").value || "";
+    saveState("Turno salvato · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+    renderHistory();
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", resetCurrent);
+
+  document.querySelectorAll(".navbtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".navbtn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
       btn.classList.add("active");
       document.getElementById(btn.dataset.target).classList.add("active");
     });
   });
-}
-function renderAll(){ensureDay(state.selectedDate); renderTemps(); renderClean(); renderEquip(); renderExpiry(); renderNotes(); renderHistory()}
-initTop(); setupNav(); attachNotes(); ensureDay(state.selectedDate); renderAll();
+
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "locoselli-haccp-backup.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  document.getElementById("importBtn").addEventListener("click", () => {
+    document.getElementById("importFile").click();
+  });
+
+  document.getElementById("importFile").addEventListener("change", e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try{
+        state = Object.assign(defaultState(), JSON.parse(ev.target.result));
+        saveState("Backup importato");
+        renderAll();
+      }catch(err){
+        setStatus("Backup non valido");
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  renderAll();
+})();
 </script>
 </body>
 </html>
