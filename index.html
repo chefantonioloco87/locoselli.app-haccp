@@ -81,7 +81,7 @@
     .btn-dark{background:#1a1b21}
     .btn-danger{background:#2a1717;border-color:#532020;color:#ffdbdb}
     .toolbar{
-      display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px;margin-top:16px
+      display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:12px;margin-top:16px
     }
     .tile{
       background:rgba(255,255,255,.02);border:1px solid rgba(201,164,92,.12);border-radius:18px;padding:14px
@@ -215,6 +215,13 @@
         <h3 id="recordTimeLabel">Ora controllo</h3>
         <input type="time" id="recordTime" />
       </div>
+      <div class="tile">
+        <h3 id="entryLabel">Turno</h3>
+        <select id="entrySlot">
+          <option value="morning">Mattina</option>
+          <option value="evening">Sera</option>
+        </select>
+      </div>
     </div>
 
     <div class="tile mt16">
@@ -257,7 +264,7 @@
     <main class="contentCard">
       <section id="dashboard" class="section active">
         <h2 id="dash_title">Dashboard giornaliera</h2>
-        <p class="desc" id="dash_desc">Compila velocemente i controlli HACCP di oggi o di una data passata.</p>
+        <p class="desc" id="dash_desc">Compila velocemente i controlli HACCP di oggi o di una data passata, separando mattina e sera.</p>
 
         <div class="cards">
           <div class="card">
@@ -462,10 +469,10 @@ const STORAGE_KEY = "locoselli_haccp_v2";
 const labels = {
   it: {
     subtitle:"Controlli giornalieri · Temperature · Pulizie · Scadenze · Storico",
-    today:"Oggi", admin:"Admin: Totò", recordDate:"Data controllo", recordTime:"Ora controllo",
+    today:"Oggi", admin:"Admin: Totò", recordDate:"Data controllo", recordTime:"Ora controllo", entry:"Turno", morning:"Mattina", evening:"Sera",
     stat1:"Temperature OK", stat2:"Fuori range", stat3:"Pulizie fatte", stat4:"Scadenze vicine",
     dashboard:"Dashboard", temps:"Temperature", cleaning:"Pulizie", equipment:"Attrezzature", expiry:"Scadenze", cooking:"Cotture sicure", history:"Storico", settings:"Impostazioni",
-    dashTitle:"Dashboard giornaliera", dashDesc:"Compila velocemente i controlli HACCP di oggi o di una data passata.",
+    dashTitle:"Dashboard giornaliera", dashDesc:"Compila velocemente i controlli HACCP di oggi o di una data passata, separando mattina e sera.",
     alerts:"Alert oggi", quick:"Azioni rapide", saveDay:"Salva giornata", loadDay:"Carica data", demo:"Demo", resetDay:"Azzera data", recent:"Ultimi controlli", chart:"Andamento temperature",
     tempsTitle:"Temperature", tempsDesc:"Inserisci i valori. Il sistema segnala in automatico se sei fuori range.", kitchen:"Cucina", room:"Sala / Bar", saveTemps:"Salva temperature",
     cleanTitle:"Pulizie giornaliere", cleanDesc:"Spunta quello che è stato fatto. Puoi aggiungere note se serve.",
@@ -480,10 +487,10 @@ const labels = {
   },
   de: {
     subtitle:"Tägliche Kontrollen · Temperaturen · Reinigung · Fristen · Archiv",
-    today:"Heute", admin:"Admin: Totò", recordDate:"Kontrolldatum", recordTime:"Kontrollzeit",
+    today:"Heute", admin:"Admin: Totò", recordDate:"Kontrolldatum", recordTime:"Kontrollzeit", entry:"Schicht", morning:"Morgen", evening:"Abend",
     stat1:"Temperaturen OK", stat2:"Außerhalb Bereich", stat3:"Reinigungen erledigt", stat4:"Bald ablaufend",
     dashboard:"Dashboard", temps:"Temperaturen", cleaning:"Reinigung", equipment:"Geräte", expiry:"Fristen", cooking:"Sichere Garung", history:"Archiv", settings:"Einstellungen",
-    dashTitle:"Tägliches Dashboard", dashDesc:"Fülle die HACCP-Kontrollen von heute oder einem vergangenen Datum schnell aus.",
+    dashTitle:"Tägliches Dashboard", dashDesc:"Fülle die HACCP-Kontrollen von heute oder einem vergangenen Datum schnell aus, getrennt nach Morgen und Abend.",
     alerts:"Warnungen heute", quick:"Schnellaktionen", saveDay:"Tag speichern", loadDay:"Datum laden", demo:"Demo", resetDay:"Datum löschen", recent:"Letzte Kontrollen", chart:"Temperaturverlauf",
     tempsTitle:"Temperaturen", tempsDesc:"Werte eingeben. Das System meldet automatisch Werte außerhalb des Bereichs.", kitchen:"Küche", room:"Saal / Bar", saveTemps:"Temperaturen speichern",
     cleanTitle:"Tägliche Reinigung", cleanDesc:"Abhaken, was erledigt wurde. Notizen können ergänzt werden.",
@@ -558,22 +565,53 @@ function ensureRecord(date){
     const equip = Object.fromEntries(config.equipment.map(x=>[{clean:false,ok:false}]).map((v,i)=>[config.equipment[i], v[0]]));
     const temps = {};
     [...config.kitchenTemps, ...config.roomTemps].forEach(t => temps[t.key]="");
-    state.records[date] = {
-      date,
+    const emptySlot = {
       time: state.selectedTime || "09:00",
-      temps,
-      cleaning: clean,
-      equipment: equip,
+      temps: structuredClone(temps),
+      cleaning: structuredClone(clean),
+      equipment: structuredClone(equip),
       expiry: [],
       cooking: { chicken:"", salmon:"" },
       notes:"",
       signature:""
+    };
+    state.records[date] = {
+      date,
+      currentSlot: "morning",
+      slots: {
+        morning: structuredClone(emptySlot),
+        evening: structuredClone(emptySlot)
+      }
     };
   }
   return state.records[date];
 }
 function selectedRecord(){
   return ensureRecord(state.selectedDate);
+}
+function selectedSlotName(){
+  const rec = selectedSlot();
+  return document.getElementById("entrySlot") ? document.getElementById("entrySlot").value : (rec.currentSlot || "morning");
+}
+function selectedSlot(){
+  const rec = selectedSlot();
+  const slotName = selectedSlotName();
+  rec.currentSlot = slotName;
+  if(!rec.slots){
+    // migrate old records
+    const old = {
+      time: rec.time || state.selectedTime || "09:00",
+      temps: rec.temps || {},
+      cleaning: rec.cleaning || {},
+      equipment: rec.equipment || {},
+      expiry: rec.expiry || [],
+      cooking: rec.cooking || {chicken:"", salmon:""},
+      notes: rec.notes || "",
+      signature: rec.signature || ""
+    };
+    rec.slots = { morning: structuredClone(old), evening: structuredClone(old) };
+  }
+  return rec.slots[slotName];
 }
 
 function setNowUI(){
@@ -584,6 +622,7 @@ function setNowUI(){
 function initTopInputs(){
   document.getElementById("recordDate").value = state.selectedDate;
   document.getElementById("recordTime").value = state.selectedTime;
+  document.getElementById("entrySlot").value = ensureRecord(state.selectedDate).currentSlot || "morning";
   document.getElementById("recordDate").addEventListener("change", e=>{
     state.selectedDate = e.target.value;
     ensureRecord(state.selectedDate);
@@ -592,7 +631,12 @@ function initTopInputs(){
   });
   document.getElementById("recordTime").addEventListener("change", e=>{
     state.selectedTime = e.target.value;
-    selectedRecord().time = e.target.value;
+    selectedSlot().time = e.target.value;
+    persist();
+    renderAll();
+  });
+  document.getElementById("entrySlot").addEventListener("change", e=>{
+    ensureRecord(state.selectedDate).currentSlot = e.target.value;
     persist();
     renderAll();
   });
@@ -619,7 +663,7 @@ function createTempRows(){
   document.getElementById("roomTemps").innerHTML = config.roomTemps.map(mk).join("");
   [...config.kitchenTemps, ...config.roomTemps].forEach(item=>{
     document.getElementById(item.key).addEventListener("input", e=>{
-      selectedRecord().temps[item.key] = e.target.value;
+      selectedSlot().temps[item.key] = e.target.value;
       updateTempStatus(item);
       persist(); renderStats(); renderAlerts();
     });
@@ -664,23 +708,25 @@ function createChecklists(){
 
   config.cleaning.forEach(name=>{
     document.getElementById("clean_"+slug(name)).addEventListener("change", e=>{
-      selectedRecord().cleaning[name] = e.target.checked; persist(); renderStats();
+      selectedSlot().cleaning[name] = e.target.checked; persist(); renderStats();
     });
   });
   config.equipment.forEach(name=>{
     document.getElementById("eqc_"+slug(name)).addEventListener("change", e=>{
-      selectedRecord().equipment[name].clean = e.target.checked; persist();
+      selectedSlot().equipment[name].clean = e.target.checked; persist();
     });
     document.getElementById("eqo_"+slug(name)).addEventListener("change", e=>{
-      selectedRecord().equipment[name].ok = e.target.checked; persist();
+      selectedSlot().equipment[name].ok = e.target.checked; persist();
     });
   });
 }
 function slug(s){ return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g,"_"); }
 
 function renderSelectedRecord(){
-  const rec = selectedRecord();
+  const day = selectedRecord();
+  const rec = selectedSlot();
   document.getElementById("recordDate").value = state.selectedDate;
+  document.getElementById("entrySlot").value = day.currentSlot || "morning";
   document.getElementById("recordTime").value = rec.time || state.selectedTime || "09:00";
 
   [...config.kitchenTemps, ...config.roomTemps].forEach(item=>{
@@ -704,7 +750,7 @@ function renderSelectedRecord(){
   renderExpiry();
 }
 function updateCookingStatus(){
-  const rec = selectedRecord();
+  const rec = selectedSlot();
   const chicken = Number(rec.cooking.chicken);
   const salmon = Number(rec.cooking.salmon);
   const c = document.getElementById("cookChickenStatus");
@@ -719,13 +765,13 @@ function updateCookingStatus(){
 }
 function attachCookingHandlers(){
   document.getElementById("cookChicken").addEventListener("input", e=>{
-    selectedRecord().cooking.chicken = e.target.value; updateCookingStatus(); persist();
+    selectedSlot().cooking.chicken = e.target.value; updateCookingStatus(); persist();
   });
   document.getElementById("cookSalmon").addEventListener("input", e=>{
-    selectedRecord().cooking.salmon = e.target.value; updateCookingStatus(); persist();
+    selectedSlot().cooking.salmon = e.target.value; updateCookingStatus(); persist();
   });
   document.getElementById("dailyNotes").addEventListener("input", e=>{
-    selectedRecord().notes = e.target.value; persist();
+    selectedSlot().notes = e.target.value; persist();
   });
 }
 function renderExpiry(){
@@ -733,7 +779,7 @@ function renderExpiry(){
   const L = labels[state.language];
   const today = new Date(state.selectedDate || new Date().toISOString().slice(0,10));
   tbody.innerHTML = "";
-  selectedRecord().expiry.forEach((item, idx)=>{
+  selectedSlot().expiry.forEach((item, idx)=>{
     let chip = `<span class="chip ok">${L.ok}</span>`;
     if(item.expiry){
       const days = Math.ceil((new Date(item.expiry) - today)/(1000*60*60*24));
@@ -756,18 +802,18 @@ function addExpiry(){
   const open = document.getElementById("expOpen").value;
   const expiry = document.getElementById("expExpiry").value;
   if(!name) return;
-  selectedRecord().expiry.push({name, open, expiry});
+  selectedSlot().expiry.push({name, open, expiry});
   document.getElementById("expName").value = "";
   document.getElementById("expOpen").value = "";
   document.getElementById("expExpiry").value = "";
   persist(); renderExpiry(); renderStats(); renderAlerts(); renderHistory();
 }
 function removeExpiry(idx){
-  selectedRecord().expiry.splice(idx,1);
+  selectedSlot().expiry.splice(idx,1);
   persist(); renderExpiry(); renderStats(); renderAlerts(); renderHistory();
 }
 function countStats(){
-  const rec = selectedRecord();
+  const rec = selectedSlot();
   const allTemps = [...config.kitchenTemps, ...config.roomTemps];
   let ok = 0, bad = 0;
   allTemps.forEach(item=>{
@@ -796,7 +842,7 @@ function renderAlerts(){
   const box = document.getElementById("alertsBox");
   const L = labels[state.language];
   box.innerHTML = "";
-  const rec = selectedRecord();
+  const rec = selectedSlot();
   let msgs = [];
   [...config.kitchenTemps, ...config.roomTemps].forEach(item=>{
     const res = classifyTemp(item, rec.temps[item.key]);
@@ -820,9 +866,11 @@ function renderAlerts(){
   });
 }
 function saveDayRecord(silent=false){
-  selectedRecord().time = document.getElementById("recordTime").value || state.selectedTime;
+  const day = selectedRecord();
+  day.currentSlot = document.getElementById("entrySlot").value;
+  selectedSlot().time = document.getElementById("recordTime").value || state.selectedTime;
   persist();
-  renderHistory(); renderRecent(); renderChart(); renderStats(); renderAlerts();
+  renderHistory(); renderRecent(); renderChart(); renderStats(); renderAlerts(); renderSelectedRecord();
   if(!silent) alert(labels[state.language].saved);
 }
 function loadSelectedDay(showAlert=true){
@@ -843,12 +891,14 @@ function renderHistory(){
   const dates = Object.keys(state.records).sort().reverse();
   tbody.innerHTML = dates.map(date=>{
     const rec = state.records[date];
-    const tempOk = [...config.kitchenTemps, ...config.roomTemps].filter(item=>classifyTemp(item, rec.temps[item.key]).cls==="ok").length;
-    const clean = Object.values(rec.cleaning||{}).filter(Boolean).length;
-    const expCount = (rec.expiry||[]).length;
+    const slotName = rec.currentSlot || "morning";
+    const slot = rec.slots ? rec.slots[slotName] : rec;
+    const tempOk = [...config.kitchenTemps, ...config.roomTemps].filter(item=>classifyTemp(item, slot.temps[item.key]).cls==="ok").length;
+    const clean = Object.values(slot.cleaning||{}).filter(Boolean).length;
+    const expCount = (slot.expiry||[]).length;
     return `<tr>
       <td>${date}</td>
-      <td>${rec.time || ""}</td>
+      <td>${slot.time || ""} · ${slotName === "morning" ? labels[state.language].morning : labels[state.language].evening}</td>
       <td>${tempOk}</td>
       <td>${clean}</td>
       <td>${expCount}</td>
@@ -868,7 +918,7 @@ function goDate(date){
   state.selectedDate = date;
   ensureRecord(state.selectedDate);
   document.getElementById("recordDate").value = date;
-  const rec = selectedRecord();
+  const rec = selectedSlot();
   if(rec.time){
     document.getElementById("recordTime").value = rec.time;
   }
@@ -947,6 +997,9 @@ function applyLanguage(){
   document.getElementById("adminLabel").textContent = L.admin;
   document.getElementById("recordDateLabel").textContent = L.recordDate;
   document.getElementById("recordTimeLabel").textContent = L.recordTime;
+  document.getElementById("entryLabel").textContent = L.entry;
+  document.querySelector('#entrySlot option[value="morning"]').textContent = L.morning;
+  document.querySelector('#entrySlot option[value="evening"]').textContent = L.evening;
   document.getElementById("stat1k").textContent = L.stat1;
   document.getElementById("stat2k").textContent = L.stat2;
   document.getElementById("stat3k").textContent = L.stat3;
@@ -1058,10 +1111,10 @@ function renderAll(){
   renderSettingsValues();
   renderSignaturePreview();
   const info = document.getElementById("loadedDateInfo");
-  if(info) info.textContent = "Data caricata: " + state.selectedDate;
+  if(info) info.textContent = "Data caricata: " + state.selectedDate + " · " + (selectedSlotName() === "morning" ? labels[state.language].morning : labels[state.language].evening);
 }
 function fillDemo(){
-  const rec = selectedRecord();
+  const rec = selectedSlot();
   rec.temps = {
     cellaVerdure: 3.1, lineaPrimi: 3.4, lineaSecondi: 4.8, frigoAntipasti: 2.9,
     congelatoreCucina: -20.2, abbattitore: -19.0,
@@ -1159,7 +1212,7 @@ function initSignaturePad(){
   }
 
   window.clearCurrentSignature = function(){
-    selectedRecord().signature = "";
+    selectedSlot().signature = "";
     persist();
     clearSignatureCanvasOnly();
     renderSignaturePreview();
@@ -1167,7 +1220,7 @@ function initSignaturePad(){
 
   window.saveCurrentSignature = function(){
     const data = canvas.toDataURL("image/png");
-    selectedRecord().signature = data;
+    selectedSlot().signature = data;
     persist();
     renderSignaturePreview();
     alert(labels[state.language].sigSaved);
@@ -1182,7 +1235,7 @@ function initSignaturePad(){
 }
 
 function renderSignaturePreview(){
-  const rec = selectedRecord();
+  const rec = selectedSlot();
   const box = document.getElementById("signaturePreviewBox");
   const img = document.getElementById("signaturePreview");
   const meta = document.getElementById("signatureMeta");
