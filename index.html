@@ -155,6 +155,11 @@
     .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .mb12{margin-bottom:12px}.mb16{margin-bottom:16px}.mt16{margin-top:16px}
     canvas{background:#121318;border:1px solid var(--line);border-radius:16px;width:100%;height:240px}
+    .sigWrap{background:var(--panel-2);border:1px solid var(--line);border-radius:18px;padding:14px}
+    #signaturePad{background:#fff;border:1px dashed #999;border-radius:14px;width:100%;height:180px;touch-action:none}
+    .sigPreview{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .sigPreview img{max-width:260px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .sigMeta{color:var(--muted);font-size:13px}
 
     @media (max-width: 900px){
       .toolbar, .quickstats, .cards, .grid3, .grid2, .layout, .checkgrid{grid-template-columns:1fr}
@@ -270,10 +275,25 @@
           </div>
         </div>
 
+        <div class="card mt16">
+          <h4 id="sig_title">Firma del giorno</h4>
+          <div class="sigWrap">
+            <canvas id="signaturePad" width="800" height="220"></canvas>
+            <div class="footerActions">
+              <button class="btn-dark" id="sigClearBtn">Cancella firma</button>
+              <button class="btn-gold" id="sigSaveBtn">Salva firma</button>
+            </div>
+            <div class="sigPreview mt16" id="signaturePreviewBox" style="display:none">
+              <img id="signaturePreview" alt="Firma salvata" />
+              <div class="sigMeta" id="signatureMeta"></div>
+            </div>
+          </div>
+        </div>
+
         <div class="grid2 mt16">
           <div class="card">
             <h4 id="dash_recent">Ultimi controlli</h4>
-            <div id="recentDays"></div>
+            <div id="recentDays"></div><div class="small muted mt16" id="loadedDateInfo"></div>
           </div>
           <div class="card">
             <h4 id="dash_chart">Andamento temperature</h4>
@@ -488,7 +508,7 @@ const config = {
     { key:"abbattitore", label:"Abbattitore", type:"freezer" }
   ],
   roomTemps: [
-    { key:"frigoViniRossi", label:"Frigo vini rossi", type:"fridge" },
+    { key:"frigoViniRossi", label:"Frigo vini rossi", type:"fridge", min:12, max:18 },
     { key:"frigoViniBianchi", label:"Frigo vini bianchi", type:"fridge" },
     { key:"congelatoreSala", label:"Congelatore sala", type:"freezer" },
     { key:"frigoBevande", label:"Frigo bevande", type:"fridge" },
@@ -546,7 +566,8 @@ function ensureRecord(date){
       equipment: equip,
       expiry: [],
       cooking: { chicken:"", salmon:"" },
-      notes:""
+      notes:"",
+      signature:""
     };
   }
   return state.records[date];
@@ -608,7 +629,9 @@ function classifyTemp(item, val){
   if(val === "" || isNaN(Number(val))) return {text:"—", cls:""};
   const v = Number(val);
   if(item.type==="fridge"){
-    if(v >= state.ranges.fridgeMin && v <= state.ranges.fridgeMax) return {text:"OK", cls:"ok"};
+    const min = typeof item.min === "number" ? item.min : state.ranges.fridgeMin;
+    const max = typeof item.max === "number" ? item.max : state.ranges.fridgeMax;
+    if(v >= min && v <= max) return {text:"OK", cls:"ok"};
     return {text:"Fuori range", cls:"bad"};
   }
   if(item.type==="freezer"){
@@ -843,8 +866,20 @@ function renderRecent(){
 }
 function goDate(date){
   state.selectedDate = date;
+  ensureRecord(state.selectedDate);
   document.getElementById("recordDate").value = date;
+  const rec = selectedRecord();
+  if(rec.time){
+    document.getElementById("recordTime").value = rec.time;
+  }
   renderAll();
+  document.querySelectorAll(".navbtn").forEach(b=>b.classList.remove("active"));
+  const dashBtn = document.querySelector('.navbtn[data-target="dashboard"]');
+  if(dashBtn) dashBtn.classList.add("active");
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  const dashboard = document.getElementById("dashboard");
+  if(dashboard) dashboard.classList.add("active");
+  window.scrollTo({top:0, behavior:"smooth"});
 }
 function renderChart(){
   const canvas = document.getElementById("tempChart");
@@ -976,6 +1011,9 @@ function applyLanguage(){
   document.getElementById("set_ranges").textContent = L.ranges;
   document.getElementById("set_notes").textContent = L.notes;
   document.getElementById("saveSettingsDay").textContent = L.saveDay;
+  document.getElementById("sig_title").textContent = L.sigTitle;
+  document.getElementById("sigClearBtn").textContent = L.sigClear;
+  document.getElementById("sigSaveBtn").textContent = L.sigSave;
 
   document.getElementById("langSelect").value = state.language;
 }
@@ -1018,6 +1056,9 @@ function renderAll(){
   renderRecent();
   renderChart();
   renderSettingsValues();
+  renderSignaturePreview();
+  const info = document.getElementById("loadedDateInfo");
+  if(info) info.textContent = "Data caricata: " + state.selectedDate;
 }
 function fillDemo(){
   const rec = selectedRecord();
@@ -1041,6 +1082,126 @@ function fillDemo(){
 function addDays(dateStr, days){
   const d = new Date(dateStr); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10);
 }
+
+function initSignaturePad(){
+  const canvas = document.getElementById("signaturePad");
+  const ctx = canvas.getContext("2d");
+  let drawing = false;
+
+  function resizeCanvas(){
+    const ratio = window.devicePixelRatio || 1;
+    const cssWidth = canvas.clientWidth || 800;
+    const cssHeight = 180;
+    const current = selectedRecord();
+    const previous = current.signature || "";
+    canvas.width = Math.floor(cssWidth * ratio);
+    canvas.height = Math.floor(cssHeight * ratio);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#111";
+    if(previous){
+      drawSignatureImage(previous);
+    } else {
+      clearSignatureCanvasOnly();
+    }
+  }
+
+  function getPos(e){
+    const rect = canvas.getBoundingClientRect();
+    const p = e.touches ? e.touches[0] : e;
+    return { x: p.clientX - rect.left, y: p.clientY - rect.top };
+  }
+
+  function start(e){
+    drawing = true;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    e.preventDefault();
+  }
+
+  function move(e){
+    if(!drawing) return;
+    const pos = getPos(e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    e.preventDefault();
+  }
+
+  function end(){
+    drawing = false;
+  }
+
+  canvas.addEventListener("mousedown", start);
+  canvas.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", end);
+
+  canvas.addEventListener("touchstart", start, {passive:false});
+  canvas.addEventListener("touchmove", move, {passive:false});
+  window.addEventListener("touchend", end);
+
+  function clearSignatureCanvasOnly(){
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle = "#111";
+  }
+
+  function drawSignatureImage(dataUrl){
+    const img = new Image();
+    img.onload = () => {
+      clearSignatureCanvasOnly();
+      const cw = canvas.clientWidth || 800;
+      const ch = 180;
+      ctx.drawImage(img, 0, 0, cw, ch);
+    };
+    img.src = dataUrl;
+  }
+
+  window.clearCurrentSignature = function(){
+    selectedRecord().signature = "";
+    persist();
+    clearSignatureCanvasOnly();
+    renderSignaturePreview();
+  };
+
+  window.saveCurrentSignature = function(){
+    const data = canvas.toDataURL("image/png");
+    selectedRecord().signature = data;
+    persist();
+    renderSignaturePreview();
+    alert(labels[state.language].sigSaved);
+  };
+
+  document.getElementById("sigClearBtn").addEventListener("click", window.clearCurrentSignature);
+  document.getElementById("sigSaveBtn").addEventListener("click", window.saveCurrentSignature);
+  window.addEventListener("resize", resizeCanvas);
+
+  window._signaturePadHelpers = { resizeCanvas, clearSignatureCanvasOnly, drawSignatureImage };
+  resizeCanvas();
+}
+
+function renderSignaturePreview(){
+  const rec = selectedRecord();
+  const box = document.getElementById("signaturePreviewBox");
+  const img = document.getElementById("signaturePreview");
+  const meta = document.getElementById("signatureMeta");
+  const L = labels[state.language];
+  if(rec.signature){
+    box.style.display = "flex";
+    img.src = rec.signature;
+    meta.textContent = `${state.selectedDate} · ${rec.time || ""}`;
+  } else {
+    box.style.display = "flex";
+    img.removeAttribute("src");
+    meta.textContent = L.sigEmpty;
+  }
+  if(window._signaturePadHelpers){
+    if(rec.signature) window._signaturePadHelpers.drawSignatureImage(rec.signature);
+    else window._signaturePadHelpers.clearSignatureCanvasOnly();
+  }
+}
+
 function exportBackup(){
   const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
   const a = document.createElement("a");
@@ -1088,6 +1249,7 @@ window.goDate = goDate;
   setupLanguage();
   setupSettings();
   attachCookingHandlers();
+  initSignaturePad();
   renderAll();
 })();
 </script>
