@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Locoselli HACCP V9</title>
+  <title>Locoselli HACCP Firebase</title>
   <link rel="icon" href="logo.PNG">
   <link rel="apple-touch-icon" href="logo-apple.png">
   <style>
@@ -69,7 +69,7 @@
         <div class="logo"><img src="logo.PNG" alt="Locoselli" onerror="this.style.display='none'; this.parentNode.textContent='L';"></div>
         <div>
           <h1>Locoselli HACCP</h1>
-          <div class="muted">V9 · storico cliccabile senza tasto Carica</div>
+          <div class="muted">Firebase · dati condivisi online</div>
         </div>
       </div>
       <div class="actions">
@@ -178,7 +178,34 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB_9PFG70Q95UKY0nCfATwsGWlW91rKvus",
+  authDomain: "locoselli-haccp.firebaseapp.com",
+  projectId: "locoselli-haccp",
+  storageBucket: "locoselli-haccp.firebasestorage.app",
+  messagingSenderId: "1071449918929",
+  appId: "1:1071449918929:web:471dba7ee01056e316e4f0",
+  measurementId: "G-3XYSQ6W62D"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const cloudDocRef = doc(db, "locoselliHaccp", "sharedState");
+let cloudReady = false;
+let applyingRemote = false;
+let saveTimer = null;
+
 (function(){
   const STORAGE_KEY = "locoselli_haccp_v9";
 
@@ -232,9 +259,31 @@
 
   let state = loadState();
 
+  async function saveCloudNow(){
+    if(applyingRemote) return;
+    const payload = {
+      records: state.records || {},
+      updatedAt: serverTimestamp()
+    };
+    await setDoc(cloudDocRef, payload);
+  }
+
   function saveState(msg){
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     if(msg) document.getElementById("statusBox").textContent = msg;
+
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      saveCloudNow()
+        .then(() => {
+          cloudReady = true;
+          if(msg) document.getElementById("statusBox").textContent = msg + " · Online";
+        })
+        .catch(err => {
+          console.error("Errore Firebase:", err);
+          document.getElementById("statusBox").textContent = "Errore Firebase: controlla Rules / connessione";
+        });
+    }, 350);
   }
 
   function ensureDate(date){
@@ -548,7 +597,45 @@
     reader.readAsText(file);
   });
 
+  async function startCloudSync(){
+    document.getElementById("statusBox").textContent = "Collegamento Firebase...";
+    try{
+      const snap = await getDoc(cloudDocRef);
+      if(snap.exists()){
+        const cloud = snap.data();
+        if(cloud && cloud.records){
+          state.records = cloud.records;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          renderAll();
+          document.getElementById("statusBox").textContent = "Dati caricati da Firebase · Online";
+        }
+      }else{
+        await saveCloudNow();
+        document.getElementById("statusBox").textContent = "Firebase pronto · Primo salvataggio creato";
+      }
+      cloudReady = true;
+
+      onSnapshot(cloudDocRef, snap => {
+        if(!snap.exists() || !cloudReady) return;
+        const cloud = snap.data();
+        if(!cloud || !cloud.records) return;
+        applyingRemote = true;
+        state.records = cloud.records;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        renderAll();
+        applyingRemote = false;
+      }, err => {
+        console.error("Errore sincronizzazione Firebase:", err);
+        document.getElementById("statusBox").textContent = "Errore sincronizzazione Firebase";
+      });
+    }catch(err){
+      console.error("Firebase non collegato:", err);
+      document.getElementById("statusBox").textContent = "Offline o Rules bloccate: dati salvati solo su questo dispositivo";
+    }
+  }
+
   renderAll();
+  startCloudSync();
 })();
 </script>
 </body>
