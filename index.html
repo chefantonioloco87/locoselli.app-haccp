@@ -336,6 +336,9 @@ let saveTimer = null;
         const slot = rec[shift];
         if(!isSlotEmpty(slot)) return;
         slot.time = "CHIUSO";
+        Object.keys(slot.temps || {}).forEach(tempKey => {
+          slot.temps[tempKey] = "CHIUSO";
+        });
         slot.notes = "Locale chiuso";
         updatedSlots += 1;
       });
