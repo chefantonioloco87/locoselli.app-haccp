@@ -173,6 +173,7 @@
       <div class="actions">
         <button type="button" class="gold" id="saveBtn">Salva turno</button>
         <button type="button" id="resetBtn">Azzera turno</button>
+        <button type="button" id="fillJanBtn">Completa da gennaio</button>
       </div>
     </div>
   </div>
@@ -297,6 +298,58 @@ let saveTimer = null;
 
   function currentSlot(){
     return ensureDate(state.selectedDate)[state.selectedShift];
+  }
+
+  function isSlotEmpty(slot){
+    const hasTime = typeof slot.time === "string" && slot.time.trim() !== "";
+    const hasTemps = Object.values(slot.temps || {}).some(v => v !== "" && v !== null && v !== undefined);
+    const hasCleaning = Object.values(slot.cleaning || {}).some(Boolean);
+    const hasEquipment = Object.values(slot.equipment || {}).some(v => !!(v && (v.clean || v.ok)));
+    const hasNotes = typeof slot.notes === "string" && slot.notes.trim() !== "";
+    return !(hasTime || hasTemps || hasCleaning || hasEquipment || hasNotes);
+  }
+
+  function dateKey(d){
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + day;
+  }
+
+  function fillMissingFromJanuary(opts = {}){
+    const persist = opts.persist !== false;
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 1);
+    let createdDays = 0;
+    let updatedSlots = 0;
+
+    for(const d = new Date(start); d <= now; d.setDate(d.getDate() + 1)){
+      const key = dateKey(d);
+      const existed = !!state.records[key];
+      const rec = ensureDate(key);
+      if(!existed) createdDays += 1;
+
+      const wd = d.getDay();
+      if(wd !== 1 && wd !== 2) continue;
+
+      ["morning", "evening"].forEach(shift => {
+        const slot = rec[shift];
+        if(!isSlotEmpty(slot)) return;
+        slot.time = "CHIUSO";
+        slot.notes = "Locale chiuso";
+        updatedSlots += 1;
+      });
+    }
+
+    if((createdDays > 0 || updatedSlots > 0) && persist){
+      saveState();
+    }
+
+    return {
+      createdDays,
+      updatedSlots,
+      changed: createdDays > 0 || updatedSlots > 0
+    };
   }
 
   function classify(item, value){
@@ -547,6 +600,17 @@ let saveTimer = null;
 
   document.getElementById("resetBtn").addEventListener("click", resetCurrent);
 
+  document.getElementById("fillJanBtn").addEventListener("click", () => {
+    const res = fillMissingFromJanuary({persist:true});
+    renderAll();
+    if(res.changed){
+      document.getElementById("statusBox").textContent =
+        "Ripristino completato: " + res.createdDays + " giorni aggiunti, " + res.updatedSlots + " turni chiusi (lun/mar)";
+    }else{
+      document.getElementById("statusBox").textContent = "Nessun giorno mancante da gennaio a oggi";
+    }
+  });
+
   document.querySelectorAll(".navbtn").forEach(btn => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".navbtn").forEach(b => b.classList.remove("active"));
@@ -588,7 +652,12 @@ let saveTimer = null;
     reader.onload = ev => {
       try{
         state = Object.assign(defaultState(), JSON.parse(ev.target.result));
+        const restored = fillMissingFromJanuary({persist:false});
         saveState("Backup importato");
+        if(restored.changed){
+          document.getElementById("statusBox").textContent =
+            "Backup importato · aggiunti " + restored.createdDays + " giorni e " + restored.updatedSlots + " turni chiusi";
+        }
         renderAll();
       }catch(err){
         document.getElementById("statusBox").textContent = "Backup non valido";
@@ -605,9 +674,12 @@ let saveTimer = null;
         const cloud = snap.data();
         if(cloud && cloud.records){
           state.records = cloud.records;
+          const restored = fillMissingFromJanuary({persist:true});
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           renderAll();
-          document.getElementById("statusBox").textContent = "Dati caricati da Firebase · Online";
+          document.getElementById("statusBox").textContent = restored.changed
+            ? "Dati caricati da Firebase · aggiunti " + restored.createdDays + " giorni e " + restored.updatedSlots + " turni chiusi"
+            : "Dati caricati da Firebase · Online";
         }
       }else{
         await saveCloudNow();
@@ -621,6 +693,7 @@ let saveTimer = null;
         if(!cloud || !cloud.records) return;
         applyingRemote = true;
         state.records = cloud.records;
+        fillMissingFromJanuary({persist:false});
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         renderAll();
         applyingRemote = false;
