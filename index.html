@@ -335,28 +335,59 @@ let saveTimer = null;
 
       ["morning", "evening"].forEach(shift => {
         const slot = rec[shift];
-        if(!isSlotEmpty(slot)) return;
+        const slotWasEmpty = isSlotEmpty(slot);
+        let touched = false;
+
         if(isClosedDay){
-          slot.time = "CHIUSO";
+          if(String(slot.time || "").trim() === ""){
+            slot.time = "CHIUSO";
+            touched = true;
+          }
           Object.keys(slot.temps || {}).forEach(tempKey => {
-            slot.temps[tempKey] = "CHIUSO";
+            if(String(slot.temps[tempKey] || "").trim() === ""){
+              slot.temps[tempKey] = "CHIUSO";
+              touched = true;
+            }
           });
-          cleaningItems.forEach(name => {
-            slot.cleaning[name] = null;
-          });
-          slot.notes = "Locale chiuso";
-          closedSlots += 1;
+          const markClosedCleaning = slotWasEmpty || String(slot.time || "").toUpperCase() === "CHIUSO" || String(slot.notes || "") === "Locale chiuso";
+          if(markClosedCleaning){
+            cleaningItems.forEach(name => {
+              if(slot.cleaning[name] === false || slot.cleaning[name] === undefined){
+                slot.cleaning[name] = null;
+                touched = true;
+              }
+            });
+          }
+          if(String(slot.notes || "").trim() === ""){
+            slot.notes = "Locale chiuso";
+            touched = true;
+          }
+          if(touched) closedSlots += 1;
         }else{
           Object.keys(slot.temps || {}).forEach(tempKey => {
-            slot.temps[tempKey] = "N/D";
+            if(String(slot.temps[tempKey] || "").trim() === ""){
+              slot.temps[tempKey] = "N/D";
+              touched = true;
+            }
           });
-          cleaningItems.forEach(name => {
-            slot.cleaning[name] = null;
-          });
-          slot.notes = "Compilazione automatica: dati mancanti";
-          filledSlots += 1;
+          const markOpenCleaning = slotWasEmpty || String(slot.notes || "") === "Compilazione automatica: dati mancanti";
+          if(markOpenCleaning){
+            cleaningItems.forEach(name => {
+              if(slot.cleaning[name] === false || slot.cleaning[name] === undefined){
+                slot.cleaning[name] = null;
+                touched = true;
+              }
+            });
+          }
+          if(String(slot.notes || "").trim() === "" && touched){
+            slot.notes = "Compilazione automatica: dati mancanti";
+          }
+          if(touched) filledSlots += 1;
         }
-        updatedSlots += 1;
+
+        if(touched){
+          updatedSlots += 1;
+        }
       });
     }
 
