@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport\" content="width=device-width, initial-scale=1.0">
   <title>Locoselli HACCP Firebase</title>
   <link rel="icon" href="logo.PNG">
   <link rel="apple-touch-icon" href="logo-apple.png">
@@ -300,7 +300,33 @@ let saveTimer = null;
     return ensureDate(state.selectedDate)[state.selectedShift];
   }
 
+  function ensureSlotShape(slot){
+    if(!slot.temps || typeof slot.temps !== "object") slot.temps = {};
+    [...tempKitchen, ...tempRoom].forEach(item => {
+      if(slot.temps[item.key] === undefined || slot.temps[item.key] === null) slot.temps[item.key] = "";
+    });
+
+    if(!slot.cleaning || typeof slot.cleaning !== "object") slot.cleaning = {};
+    cleaningItems.forEach(name => {
+      if(slot.cleaning[name] === undefined) slot.cleaning[name] = false;
+    });
+
+    if(!slot.equipment || typeof slot.equipment !== "object") slot.equipment = {};
+    equipmentItems.forEach(name => {
+      if(!slot.equipment[name] || typeof slot.equipment[name] !== "object"){
+        slot.equipment[name] = {clean:false, ok:false};
+        return;
+      }
+      if(slot.equipment[name].clean === undefined) slot.equipment[name].clean = false;
+      if(slot.equipment[name].ok === undefined) slot.equipment[name].ok = false;
+    });
+
+    if(typeof slot.time !== "string") slot.time = slot.time ? String(slot.time) : "";
+    if(typeof slot.notes !== "string") slot.notes = slot.notes ? String(slot.notes) : "";
+  }
+
   function isSlotEmpty(slot){
+    ensureSlotShape(slot);
     const hasTime = typeof slot.time === "string" && slot.time.trim() !== "";
     const hasTemps = Object.values(slot.temps || {}).some(v => v !== "" && v !== null && v !== undefined);
     const hasCleaning = Object.values(slot.cleaning || {}).some(Boolean);
@@ -335,6 +361,7 @@ let saveTimer = null;
 
       ["morning", "evening"].forEach(shift => {
         const slot = rec[shift];
+        ensureSlotShape(slot);
         const slotWasEmpty = isSlotEmpty(slot);
         let touched = false;
 
@@ -349,15 +376,12 @@ let saveTimer = null;
               touched = true;
             }
           });
-          const markClosedCleaning = slotWasEmpty || String(slot.time || "").toUpperCase() === "CHIUSO" || String(slot.notes || "") === "Locale chiuso";
-          if(markClosedCleaning){
-            cleaningItems.forEach(name => {
-              if(slot.cleaning[name] === false || slot.cleaning[name] === undefined){
-                slot.cleaning[name] = null;
-                touched = true;
-              }
-            });
-          }
+          cleaningItems.forEach(name => {
+            if(slot.cleaning[name] === false || slot.cleaning[name] === undefined){
+              slot.cleaning[name] = null;
+              touched = true;
+            }
+          });
           if(String(slot.notes || "").trim() === ""){
             slot.notes = "Locale chiuso";
             touched = true;
@@ -370,7 +394,7 @@ let saveTimer = null;
               touched = true;
             }
           });
-          const markOpenCleaning = slotWasEmpty || String(slot.notes || "") === "Compilazione automatica: dati mancanti";
+          const markOpenCleaning = slotWasEmpty || touched || String(slot.notes || "") === "Compilazione automatica: dati mancanti";
           if(markOpenCleaning){
             cleaningItems.forEach(name => {
               if(slot.cleaning[name] === false || slot.cleaning[name] === undefined){
