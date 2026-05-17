@@ -321,6 +321,8 @@ let saveTimer = null;
     const now = new Date();
     const start = new Date(now.getFullYear(), 0, 1);
     let createdDays = 0;
+    let closedSlots = 0;
+    let filledSlots = 0;
     let updatedSlots = 0;
 
     for(const d = new Date(start); d <= now; d.setDate(d.getDate() + 1)){
@@ -328,18 +330,32 @@ let saveTimer = null;
       const existed = !!state.records[key];
       const rec = ensureDate(key);
       if(!existed) createdDays += 1;
-
       const wd = d.getDay();
-      if(wd !== 1 && wd !== 2) continue;
+      const isClosedDay = wd === 1 || wd === 2;
 
       ["morning", "evening"].forEach(shift => {
         const slot = rec[shift];
         if(!isSlotEmpty(slot)) return;
-        slot.time = "CHIUSO";
-        Object.keys(slot.temps || {}).forEach(tempKey => {
-          slot.temps[tempKey] = "CHIUSO";
-        });
-        slot.notes = "Locale chiuso";
+        if(isClosedDay){
+          slot.time = "CHIUSO";
+          Object.keys(slot.temps || {}).forEach(tempKey => {
+            slot.temps[tempKey] = "CHIUSO";
+          });
+          cleaningItems.forEach(name => {
+            slot.cleaning[name] = null;
+          });
+          slot.notes = "Locale chiuso";
+          closedSlots += 1;
+        }else{
+          Object.keys(slot.temps || {}).forEach(tempKey => {
+            slot.temps[tempKey] = "N/D";
+          });
+          cleaningItems.forEach(name => {
+            slot.cleaning[name] = null;
+          });
+          slot.notes = "Compilazione automatica: dati mancanti";
+          filledSlots += 1;
+        }
         updatedSlots += 1;
       });
     }
@@ -350,14 +366,21 @@ let saveTimer = null;
 
     return {
       createdDays,
+      closedSlots,
+      filledSlots,
       updatedSlots,
       changed: createdDays > 0 || updatedSlots > 0
     };
   }
 
   function classify(item, value){
-    if(value === "" || isNaN(Number(value))) return {text:"—", cls:""};
-    const v = Number(value);
+    const raw = String(value || "").trim();
+    const normalized = raw.toUpperCase();
+    if(raw === "") return {text:"—", cls:""};
+    if(normalized === "CHIUSO") return {text:"CHIUSO", cls:""};
+    if(normalized === "N/D" || normalized === "ND") return {text:"N/D", cls:""};
+    if(isNaN(Number(raw))) return {text:"—", cls:""};
+    const v = Number(raw);
     if(item.freezer) return v <= item.max ? {text:"OK", cls:"ok"} : {text:"Fuori range", cls:"bad"};
     return (v >= item.min && v <= item.max) ? {text:"OK", cls:"ok"} : {text:"Fuori range", cls:"bad"};
   }
@@ -383,10 +406,10 @@ let saveTimer = null;
       label.textContent = item.label;
 
       const input = document.createElement("input");
-      input.type = "number";
-      input.step = "0.1";
+      input.type = "text";
+      input.inputMode = "decimal";
       input.value = slot.temps[item.key] || "";
-      input.placeholder = "°C";
+      input.placeholder = "°C / CHIUSO";
 
       const chip = document.createElement("span");
       chip.className = "chip";
@@ -398,7 +421,13 @@ let saveTimer = null;
       }
 
       input.addEventListener("input", () => {
-        slot.temps[item.key] = input.value;
+        const raw = input.value.trim();
+        const lower = raw.toLowerCase();
+        let normalized = raw;
+        if(lower === "chiuso") normalized = "CHIUSO";
+        if(lower === "n/d" || lower === "nd") normalized = "N/D";
+        slot.temps[item.key] = normalized;
+        input.value = normalized;
         saveState("Temperatura aggiornata · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
         refreshChip();
         renderHistory();
@@ -427,7 +456,9 @@ let saveTimer = null;
 
       const cb = document.createElement("input");
       cb.type = "checkbox";
-      cb.checked = !!slot.cleaning[name];
+      const currentValue = slot.cleaning[name];
+      cb.checked = currentValue === true;
+      cb.indeterminate = currentValue === null;
       cb.addEventListener("change", () => {
         slot.cleaning[name] = cb.checked;
         saveState("Pulizia aggiornata · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
@@ -608,7 +639,7 @@ let saveTimer = null;
     renderAll();
     if(res.changed){
       document.getElementById("statusBox").textContent =
-        "Ripristino completato: " + res.createdDays + " giorni aggiunti, " + res.updatedSlots + " turni chiusi (lun/mar)";
+        "Ripristino: " + res.createdDays + " giorni aggiunti, " + res.closedSlots + " turni chiusi, " + res.filledSlots + " turni compilati N/D";
     }else{
       document.getElementById("statusBox").textContent = "Nessun giorno mancante da gennaio a oggi";
     }
@@ -659,7 +690,7 @@ let saveTimer = null;
         saveState("Backup importato");
         if(restored.changed){
           document.getElementById("statusBox").textContent =
-            "Backup importato · aggiunti " + restored.createdDays + " giorni e " + restored.updatedSlots + " turni chiusi";
+            "Backup importato · " + restored.createdDays + " giorni aggiunti, " + restored.closedSlots + " chiusi, " + restored.filledSlots + " N/D";
         }
         renderAll();
       }catch(err){
@@ -681,7 +712,7 @@ let saveTimer = null;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           renderAll();
           document.getElementById("statusBox").textContent = restored.changed
-            ? "Dati caricati da Firebase · aggiunti " + restored.createdDays + " giorni e " + restored.updatedSlots + " turni chiusi"
+            ? "Dati Firebase · " + restored.createdDays + " giorni aggiunti, " + restored.closedSlots + " chiusi, " + restored.filledSlots + " N/D"
             : "Dati caricati da Firebase · Online";
         }
       }else{
@@ -710,7 +741,12 @@ let saveTimer = null;
     }
   }
 
+  const bootFill = fillMissingFromJanuary({persist:true});
   renderAll();
+  if(bootFill.changed){
+    document.getElementById("statusBox").textContent =
+      "Compilazione iniziale: " + bootFill.createdDays + " giorni aggiunti, " + bootFill.closedSlots + " chiusi, " + bootFill.filledSlots + " N/D";
+  }
   startCloudSync();
 })();
 </script>
