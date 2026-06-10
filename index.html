@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -92,91 +92,91 @@
         <div class="logo"><img src="logo.PNG" alt="Locoselli" onerror="this.style.display='none'; this.parentNode.textContent='L';"></div>
         <div>
           <h1>Locoselli HACCP</h1>
-          <div class="muted">Firebase · dati condivisi online</div>
+          <div class="muted">Firebase · online geteilte Daten</div>
         </div>
       </div>
       <div class="actions">
-        <button type="button" id="exportBtn">Esporta backup</button>
-        <button type="button" id="importBtn">Importa backup</button>
+        <button type="button" id="exportBtn">Backup exportieren</button>
+        <button type="button" id="importBtn">Backup importieren</button>
         <input type="file" id="importFile" accept=".json" hidden>
-        <button type="button" id="demoBtn">Demo cliente</button>
-        <button type="button" class="gold" onclick="window.print()">Stampa / PDF</button>
+        <button type="button" id="demoBtn">Kunden-Demo</button>
+        <button type="button" class="gold" onclick="window.print()">Drucken / PDF</button>
       </div>
     </div>
 
     <div class="toolbar">
       <div class="tile">
-        <h3>Oggi</h3>
+        <h3>Heute</h3>
         <div id="todayLabel"></div>
       </div>
       <div class="tile">
-        <h3>Data controllo</h3>
+        <h3>Kontrolldatum</h3>
         <input type="date" id="dateInput">
       </div>
       <div class="tile">
-        <h3>Ora controllo</h3>
+        <h3>Kontrollzeit</h3>
         <input type="time" id="timeInput">
       </div>
       <div class="tile">
-        <h3>Turno</h3>
+        <h3>Schicht</h3>
         <select id="shiftInput">
-          <option value="morning">Mattina</option>
-          <option value="evening">Sera</option>
+          <option value="morning">Morgen</option>
+          <option value="evening">Abend</option>
         </select>
       </div>
     </div>
 
-    <div class="status" id="statusBox">Pronto.</div>
+    <div class="status" id="statusBox">Bereit.</div>
 
     <div class="tile quick-start" id="quickStart">
-      <h3>Avvio rapido giornaliero</h3>
-      <div class="muted" id="quickPrompt">Apri il giorno, scegli Mattina o Sera, poi tocchi temperature e pulizie.</div>
+      <h3>Täglicher Schnellstart</h3>
+      <div class="muted" id="quickPrompt">Tag öffnen, Morgen oder Abend wählen, dann Temperaturen und Reinigungen antippen.</div>
       <div class="quick-shifts">
-        <button type="button" class="quick-shift" id="quickMorning">Mattina</button>
-        <button type="button" class="quick-shift" id="quickEvening">Sera</button>
+        <button type="button" class="quick-shift" id="quickMorning">Morgen</button>
+        <button type="button" class="quick-shift" id="quickEvening">Abend</button>
       </div>
       <div class="quick-actions">
-        <button type="button" id="quickTempsOk">Temperature OK automatiche</button>
-        <button type="button" id="quickCleaningYes">Pulizie tutte SI</button>
-        <button type="button" class="gold" id="quickSaveBtn">Completa e salva</button>
-        <button type="button" id="quickNextShiftBtn">Passa all'altro turno</button>
+        <button type="button" id="quickTempsOk">Temperaturen automatisch OK</button>
+        <button type="button" id="quickCleaningYes">Alle Reinigungen JA</button>
+        <button type="button" class="gold" id="quickSaveBtn">Ausfüllen und speichern</button>
+        <button type="button" id="quickNextShiftBtn">Zur anderen Schicht</button>
       </div>
-      <div class="quick-note">Per il controllo normale bastano pochi tocchi: scegli il turno, controlla le temperature dai pulsanti, conferma le pulizie con SI/NO e salva.</div>
+      <div class="quick-note">Für die normale Kontrolle reichen wenige Klicks: Schicht wählen, Temperaturen über die Tasten prüfen, Reinigungen mit JA/NEIN bestätigen und speichern.</div>
     </div>
 
     <div class="tile quickfill">
-      <h3>Compilazione veloce (valori reali)</h3>
+      <h3>Schnellausfüllung (echte Werte)</h3>
       <div class="bulkgrid">
         <input type="date" id="bulkFromInput">
         <input type="date" id="bulkToInput">
-        <label class="inlineCheck"><input type="checkbox" id="bulkTemps" checked> Temperature</label>
-        <label class="inlineCheck"><input type="checkbox" id="bulkCleaning" checked> Pulizie</label>
+        <label class="inlineCheck"><input type="checkbox" id="bulkTemps" checked> Temperaturen</label>
+        <label class="inlineCheck"><input type="checkbox" id="bulkCleaning" checked> Reinigungen</label>
       </div>
       <div class="actions" style="margin-top:10px">
-        <button type="button" id="copyPrevBtn">Copia ultimo turno simile</button>
-        <button type="button" id="applyRangeBtn">Applica ai giorni selezionati</button>
+        <button type="button" id="copyPrevBtn">Letzte ähnliche Schicht kopieren</button>
+        <button type="button" id="applyRangeBtn">Auf ausgewählte Tage anwenden</button>
       </div>
     </div>
   </div>
 
   <div class="layout">
     <div class="side">
-      <button type="button" class="navbtn active" data-target="temperature">🌡️ Temperature</button>
-      <button type="button" class="navbtn" data-target="cleaning">🧼 Pulizie</button>
-      <button type="button" class="navbtn" data-target="equipment">⚙️ Attrezzature</button>
-      <button type="button" class="navbtn" data-target="notes">📝 Note</button>
-      <button type="button" class="navbtn" data-target="history">📚 Storico</button>
+      <button type="button" class="navbtn active" data-target="temperature">🌡️ Temperaturen</button>
+      <button type="button" class="navbtn" data-target="cleaning">🧼 Reinigung</button>
+      <button type="button" class="navbtn" data-target="equipment">⚙️ Geräte</button>
+      <button type="button" class="navbtn" data-target="notes">📝 Notizen</button>
+      <button type="button" class="navbtn" data-target="history">📚 Verlauf</button>
     </div>
 
     <div class="main">
       <section id="temperature" class="section active">
         <div class="grid2">
           <div class="panel">
-            <h3>Cucina</h3>
+            <h3>Küche</h3>
             <div id="tempsKitchen"></div>
           </div>
           <div class="panel">
-            <h3>Sala / Bar</h3>
+            <h3>Restaurant / Bar</h3>
             <div id="tempsRoom"></div>
           </div>
         </div>
@@ -184,38 +184,38 @@
 
       <section id="cleaning" class="section">
         <div class="panel">
-          <h3>Pulizie</h3>
+          <h3>Reinigung</h3>
           <div id="cleaningGrid" class="checkgrid"></div>
         </div>
       </section>
 
       <section id="equipment" class="section">
         <div class="panel">
-          <h3>Attrezzature</h3>
+          <h3>Geräte</h3>
           <div id="equipmentGrid" class="checkgrid"></div>
         </div>
       </section>
 
       <section id="notes" class="section">
         <div class="panel">
-          <h3>Note</h3>
-          <textarea id="notesInput" placeholder="Note, problemi, azioni correttive..."></textarea>
+          <h3>Notizen</h3>
+          <textarea id="notesInput" placeholder="Notizen, Probleme, Korrekturmaßnahmen..."></textarea>
         </div>
       </section>
 
       <section id="history" class="section">
         <div class="panel">
-          <h3>Storico</h3>
-          <div class="muted" style="margin-bottom:10px">Tocca direttamente la riga da caricare.</div>
+          <h3>Verlauf</h3>
+          <div class="muted" style="margin-bottom:10px">Zum Laden direkt auf eine Zeile tippen.</div>
           <div class="tablewrap">
             <table>
               <thead>
                 <tr>
-                  <th>Data</th>
-                  <th>Turno</th>
-                  <th>Ora</th>
+                  <th>Datum</th>
+                  <th>Schicht</th>
+                  <th>Zeit</th>
                   <th>Temp</th>
-                  <th>Pulizie</th>
+                  <th>Reinigung</th>
                 </tr>
               </thead>
               <tbody id="historyBody"></tbody>
@@ -225,9 +225,9 @@
       </section>
 
       <div class="actions">
-        <button type="button" class="gold" id="saveBtn">Salva turno</button>
-        <button type="button" id="resetBtn">Azzera turno</button>
-        <button type="button" id="fillJanBtn">Completa da gennaio</button>
+        <button type="button" class="gold" id="saveBtn">Schicht speichern</button>
+        <button type="button" id="resetBtn">Schicht zurücksetzen</button>
+        <button type="button" id="fillJanBtn">Ab Januar ausfüllen</button>
       </div>
     </div>
   </div>
@@ -265,22 +265,53 @@ let saveTimer = null;
   const STORAGE_KEY = "locoselli_haccp_v9";
 
   const tempKitchen = [
-    {key:"cellaVerdure", label:"Frigo cella verdure", min:0, max:4},
-    {key:"lineaPrimi", label:"Frigo linea primi", min:0, max:4},
-    {key:"lineaSecondi", label:"Frigo linea secondi", min:0, max:4},
-    {key:"frigoAntipasti", label:"Frigo antipasti", min:0, max:4},
-    {key:"congelatoreCucina", label:"Congelatore cucina", max:-18, freezer:true},
-    {key:"abbattitore", label:"Abbattitore", max:-18, freezer:true}
+    {key:"cellaVerdure", label:"Kühlhaus Gemüse", min:0, max:4},
+    {key:"lineaPrimi", label:"Kühlschrank Linie Primi", min:0, max:4},
+    {key:"lineaSecondi", label:"Kühlschrank Linie Secondi", min:0, max:4},
+    {key:"frigoAntipasti", label:"Kühlschrank Antipasti", min:0, max:4},
+    {key:"congelatoreCucina", label:"Gefrierschrank Küche", max:-18, freezer:true},
+    {key:"abbattitore", label:"Schockfroster", max:-18, freezer:true}
   ];
   const tempRoom = [
-    {key:"frigoViniRossi", label:"Frigo vini rossi", min:12, max:18},
-    {key:"frigoViniBianchi", label:"Frigo vini bianchi", min:4, max:8},
-    {key:"congelatoreSala", label:"Congelatore sala", max:-18, freezer:true},
-    {key:"frigoBevande", label:"Frigo bevande", min:0, max:4},
-    {key:"cellaSottoBevande", label:"Cella sotto bevande", min:0, max:4}
+    {key:"frigoViniRossi", label:"Weinkühlschrank Rotwein", min:12, max:18},
+    {key:"frigoViniBianchi", label:"Weinkühlschrank Weißwein", min:4, max:8},
+    {key:"congelatoreSala", label:"Gefrierschrank Restaurant", max:-18, freezer:true},
+    {key:"frigoBevande", label:"Getränkekühlschrank", min:0, max:4},
+    {key:"cellaSottoBevande", label:"Kühlhaus Getränke unten", min:0, max:4}
   ];
   const cleaningItems = ["Bagno sopra","Bagno sotto","Bagno personale","Pavimenti","Finestre","Scaffali","Tavoli","Superfici lavoro","Celle e frigo"];
   const equipmentItems = ["Bollitore","Cuocipasta","Griglia","Cappa","Forno ventilato","Thermomix 1","Thermomix 2","Planetaria","Macchina caffè","Scaffali fuori"];
+  const cleaningLabels = {
+    "Bagno sopra":"WC oben",
+    "Bagno sotto":"WC unten",
+    "Bagno personale":"Personal-WC",
+    "Pavimenti":"Böden",
+    "Finestre":"Fenster",
+    "Scaffali":"Regale",
+    "Tavoli":"Tische",
+    "Superfici lavoro":"Arbeitsflächen",
+    "Celle e frigo":"Kühlhäuser und Kühlschränke"
+  };
+  const equipmentLabels = {
+    "Bollitore":"Wasserkocher",
+    "Cuocipasta":"Pastakocher",
+    "Griglia":"Grill",
+    "Cappa":"Abzugshaube",
+    "Forno ventilato":"Umluftofen",
+    "Thermomix 1":"Thermomix 1",
+    "Thermomix 2":"Thermomix 2",
+    "Planetaria":"Küchenmaschine",
+    "Macchina caffè":"Kaffeemaschine",
+    "Scaffali fuori":"Regale außen"
+  };
+
+  function displayCleaning(name){
+    return cleaningLabels[name] || name;
+  }
+
+  function displayEquipment(name){
+    return equipmentLabels[name] || name;
+  }
 
   function emptySlot(){
     const temps = {};
@@ -338,7 +369,7 @@ let saveTimer = null;
         })
         .catch(err => {
           console.error("Errore Firebase:", err);
-          document.getElementById("statusBox").textContent = "Errore Firebase: controlla Rules / connessione";
+          document.getElementById("statusBox").textContent = "Firebase-Fehler: Regeln / Verbindung prüfen";
         });
     }, 350);
   }
@@ -458,7 +489,7 @@ let saveTimer = null;
   function copyLatestSimilarToCurrent(){
     const found = findLatestRealSlot(state.selectedShift);
     if(!found){
-      document.getElementById("statusBox").textContent = "Nessun turno modello trovato con temperature reali";
+      document.getElementById("statusBox").textContent = "Keine Musterschicht mit echten Temperaturen gefunden";
       return;
     }
 
@@ -484,10 +515,10 @@ let saveTimer = null;
     }
 
     if(changed > 0){
-      saveState("Copiato turno modello del " + found.date + " (" + (state.selectedShift === "morning" ? "Mattina" : "Sera") + ")");
+      saveState("Musterschicht vom " + found.date + " kopiert (" + shiftLabel() + ")");
       renderAll();
     }else{
-      document.getElementById("statusBox").textContent = "Turno corrente già compilato";
+      document.getElementById("statusBox").textContent = "Aktuelle Schicht bereits ausgefüllt";
     }
   }
 
@@ -498,18 +529,18 @@ let saveTimer = null;
     const copyCleaning = document.getElementById("bulkCleaning").checked;
 
     if(!from || !to){
-      document.getElementById("statusBox").textContent = "Seleziona un intervallo date";
+      document.getElementById("statusBox").textContent = "Datumsbereich auswählen";
       return;
     }
 
     const start = keyToDate(from);
     const end = keyToDate(to);
     if(start > end){
-      document.getElementById("statusBox").textContent = "Intervallo non valido";
+      document.getElementById("statusBox").textContent = "Ungültiger Zeitraum";
       return;
     }
     if(!copyTemps && !copyCleaning){
-      document.getElementById("statusBox").textContent = "Seleziona almeno Temperature o Pulizie";
+      document.getElementById("statusBox").textContent = "Mindestens Temperaturen oder Reinigungen auswählen";
       return;
     }
 
@@ -517,7 +548,7 @@ let saveTimer = null;
     if(copyTemps && !hasRealTemperature(modelSlot)){
       const found = findLatestRealSlot(state.selectedShift);
       if(!found){
-        document.getElementById("statusBox").textContent = "Prima inserisci almeno un turno con temperature reali";
+        document.getElementById("statusBox").textContent = "Zuerst mindestens eine Schicht mit echten Temperaturen eintragen";
         return;
       }
       modelSlot = found.slot;
@@ -559,16 +590,16 @@ let saveTimer = null;
       }
 
       if(touched && toText(slot.notes) === ""){
-        slot.notes = "Compilazione veloce da turno modello";
+        slot.notes = "Schnellausfüllung aus Musterschicht";
       }
       if(touched) daysTouched += 1;
     }
 
     if(daysTouched > 0){
-      saveState("Compilazione veloce completata su " + daysTouched + " giorni");
+      saveState("Schnellausfüllung für " + daysTouched + " Tage abgeschlossen");
       renderAll();
     }else{
-      document.getElementById("statusBox").textContent = "Nessun giorno da aggiornare nell'intervallo";
+      document.getElementById("statusBox").textContent = "Kein Tag im Zeitraum zu aktualisieren";
     }
   }
 
@@ -613,7 +644,7 @@ let saveTimer = null;
             }
           });
           if(toText(slot.notes) === ""){
-            slot.notes = "Locale chiuso";
+            slot.notes = "Betrieb geschlossen";
             touched = true;
           }
           if(touched) closedSlots += 1;
@@ -624,7 +655,7 @@ let saveTimer = null;
               touched = true;
             }
           });
-          const markOpenCleaning = slotWasEmpty || touched || toText(slot.notes) === "Compilazione automatica: dati mancanti";
+          const markOpenCleaning = slotWasEmpty || touched || toText(slot.notes) === "Compilazione automatica: dati mancanti" || toText(slot.notes) === "Automatische Ausfüllung: fehlende Daten";
           if(markOpenCleaning){
             cleaningItems.forEach(name => {
               if(slot.cleaning[name] === false || slot.cleaning[name] === undefined){
@@ -634,7 +665,7 @@ let saveTimer = null;
             });
           }
           if(toText(slot.notes) === "" && touched){
-            slot.notes = "Compilazione automatica: dati mancanti";
+            slot.notes = "Automatische Ausfüllung: fehlende Daten";
           }
           if(touched) filledSlots += 1;
         }
@@ -710,7 +741,7 @@ let saveTimer = null;
     equipmentItems.forEach(name => {
       slot.equipment[name] = {clean:true, ok:true};
     });
-    slot.notes = "DEMO CLIENTE - dati fittizi per presentazione app, non registrazione HACCP reale";
+    slot.notes = "KUNDEN-DEMO - fiktive Daten zur App-Präsentation, keine echte HACCP-Aufzeichnung";
     return slot;
   }
 
@@ -734,23 +765,23 @@ let saveTimer = null;
   }
 
   function loadClientDemo(){
-    if(!confirm("Caricare dati DEMO fittizi da gennaio a oggi? I dati demo restano locali e non vengono inviati a Firebase.")) return;
+    if(!confirm("Fiktive DEMO-Daten von Januar bis heute laden? Die Demo-Daten bleiben lokal und werden nicht an Firebase gesendet.")) return;
     state = buildDemoState();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     renderAll();
-    document.getElementById("statusBox").textContent = "Demo cliente caricata: dati fittizi da gennaio a oggi";
+    document.getElementById("statusBox").textContent = "Kunden-Demo geladen: fiktive Daten von Januar bis heute";
   }
 
   function classify(item, value){
     const raw = toText(value);
     const normalized = raw.toUpperCase();
     if(raw === "") return {text:"—", cls:""};
-    if(normalized === "CHIUSO") return {text:"CHIUSO", cls:""};
+    if(normalized === "CHIUSO") return {text:"GESCHLOSSEN", cls:""};
     if(normalized === "N/D" || normalized === "ND") return {text:"N/D", cls:""};
     if(isNaN(Number(raw))) return {text:"—", cls:""};
     const v = Number(raw);
-    if(item.freezer) return v <= item.max ? {text:"OK", cls:"ok"} : {text:"Fuori range", cls:"bad"};
-    return (v >= item.min && v <= item.max) ? {text:"OK", cls:"ok"} : {text:"Fuori range", cls:"bad"};
+    if(item.freezer) return v <= item.max ? {text:"OK", cls:"ok"} : {text:"Außerhalb", cls:"bad"};
+    return (v >= item.min && v <= item.max) ? {text:"OK", cls:"ok"} : {text:"Außerhalb", cls:"bad"};
   }
 
   function tempOptions(item){
@@ -768,7 +799,7 @@ let saveTimer = null;
   }
 
   function shiftLabel(shift = state.selectedShift){
-    return shift === "morning" ? "Mattina" : "Sera";
+    return shift === "morning" ? "Morgen" : "Abend";
   }
 
   function defaultTimeForShift(shift){
@@ -779,7 +810,7 @@ let saveTimer = null;
     document.getElementById("quickMorning").classList.toggle("active", state.selectedShift === "morning");
     document.getElementById("quickEvening").classList.toggle("active", state.selectedShift === "evening");
     document.getElementById("quickPrompt").textContent =
-      state.selectedDate + " · " + shiftLabel() + " · scegli temperature e pulizie, poi salva.";
+      state.selectedDate + " · " + shiftLabel() + " · Temperaturen und Reinigungen wählen, dann speichern.";
   }
 
   function selectShift(shift, msg = true){
@@ -792,7 +823,7 @@ let saveTimer = null;
     }
     renderAll();
     if(msg){
-      saveState("Turno selezionato · " + state.selectedDate + " · " + shiftLabel(shift));
+      saveState("Schicht ausgewählt · " + state.selectedDate + " · " + shiftLabel(shift));
     }
   }
 
@@ -809,7 +840,7 @@ let saveTimer = null;
       slot.time = defaultTimeForShift(state.selectedShift);
       state.selectedTime = slot.time;
     }
-    saveState("Temperature OK automatiche · " + state.selectedDate + " · " + shiftLabel());
+    saveState("Temperaturen automatisch OK · " + state.selectedDate + " · " + shiftLabel());
     renderAll();
   }
 
@@ -822,7 +853,7 @@ let saveTimer = null;
     equipmentItems.forEach(name => {
       slot.equipment[name] = {clean:true, ok:true};
     });
-    saveState("Pulizie confermate SI · " + state.selectedDate + " · " + shiftLabel());
+    saveState("Reinigungen mit JA bestätigt · " + state.selectedDate + " · " + shiftLabel());
     renderAll();
   }
 
@@ -830,7 +861,7 @@ let saveTimer = null;
     fillQuickTempsOk();
     fillQuickCleaningYes();
     currentSlot().time = document.getElementById("timeInput").value || currentSlot().time || defaultTimeForShift(state.selectedShift);
-    saveState("Turno completato e salvato · " + state.selectedDate + " · " + shiftLabel());
+    saveState("Schicht ausgefüllt und gespeichert · " + state.selectedDate + " · " + shiftLabel());
     renderAll();
   }
 
@@ -876,9 +907,9 @@ let saveTimer = null;
         const res = classify(item, value);
         const cleanValue = toText(value).toUpperCase();
         chip.textContent = toText(value) === ""
-          ? "Da scegliere"
+          ? "Auswählen"
           : ((cleanValue === "N/D" || cleanValue === "ND" || cleanValue === "CHIUSO")
-            ? cleanValue
+            ? (cleanValue === "CHIUSO" ? "GESCHLOSSEN" : cleanValue)
             : (toText(value) + " °C · " + res.text));
         chip.className = "chip " + (res.cls || "");
       }
@@ -890,7 +921,7 @@ let saveTimer = null;
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "choicebtn";
-        btn.textContent = value === "CHIUSO" ? "Chiuso" : (value === "N/D" ? "N/D" : value + "°");
+        btn.textContent = value === "CHIUSO" ? "Geschlossen" : (value === "N/D" ? "N/D" : value + "°");
         if(toText(slot.temps[item.key]).toUpperCase() === value) btn.classList.add("active");
         btn.addEventListener("click", () => {
           slot.temps[item.key] = value;
@@ -898,7 +929,7 @@ let saveTimer = null;
             slot.time = defaultTimeForShift(state.selectedShift);
             state.selectedTime = slot.time;
           }
-          saveState("Temperatura scelta · " + item.label + " · " + state.selectedDate + " · " + shiftLabel());
+          saveState("Temperatur gewählt · " + item.label + " · " + state.selectedDate + " · " + shiftLabel());
           renderAll();
         });
         options.appendChild(btn);
@@ -924,7 +955,7 @@ let saveTimer = null;
       item.className = "checkitem";
 
       const span = document.createElement("span");
-      span.textContent = name;
+      span.textContent = displayCleaning(name);
 
       const currentValue = slot.cleaning[name];
 
@@ -934,23 +965,23 @@ let saveTimer = null;
       const yes = document.createElement("button");
       yes.type = "button";
       yes.className = "choicebtn yes" + (currentValue === true ? " active" : "");
-      yes.textContent = "SI";
+      yes.textContent = "JA";
 
       const no = document.createElement("button");
       no.type = "button";
       no.className = "choicebtn no" + (currentValue === false ? " active" : "");
-      no.textContent = "NO";
+      no.textContent = "NEIN";
 
       yes.addEventListener("click", () => {
         slot.cleaning[name] = true;
-        saveState("Pulizia SI · " + name + " · " + state.selectedDate + " · " + shiftLabel());
+        saveState("Reinigung JA · " + displayCleaning(name) + " · " + state.selectedDate + " · " + shiftLabel());
         renderCleaning();
         renderHistory();
       });
 
       no.addEventListener("click", () => {
         slot.cleaning[name] = false;
-        saveState("Pulizia NO · " + name + " · " + state.selectedDate + " · " + shiftLabel());
+        saveState("Reinigung NEIN · " + displayCleaning(name) + " · " + state.selectedDate + " · " + shiftLabel());
         renderCleaning();
         renderHistory();
       });
@@ -973,14 +1004,14 @@ let saveTimer = null;
       item.className = "checkitem";
 
       const span = document.createElement("span");
-      span.textContent = name;
+      span.textContent = displayEquipment(name);
 
       const controls = document.createElement("div");
 
       const label1 = document.createElement("label");
       label1.style.fontSize = "12px";
       label1.style.color = "#b4ac9d";
-      label1.textContent = "Pulito ";
+      label1.textContent = "Sauber ";
       const cb1 = document.createElement("input");
       cb1.type = "checkbox";
       cb1.checked = !!slot.equipment[name].clean;
@@ -996,11 +1027,11 @@ let saveTimer = null;
 
       cb1.addEventListener("change", () => {
         slot.equipment[name].clean = cb1.checked;
-        saveState("Attrezzatura aggiornata · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+        saveState("Gerät aktualisiert · " + state.selectedDate + " · " + shiftLabel());
       });
       cb2.addEventListener("change", () => {
         slot.equipment[name].ok = cb2.checked;
-        saveState("Attrezzatura aggiornata · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+        saveState("Gerät aktualisiert · " + state.selectedDate + " · " + shiftLabel());
       });
 
       label1.appendChild(cb1);
@@ -1036,7 +1067,7 @@ let saveTimer = null;
         tdDate.textContent = date;
 
         const tdShift = document.createElement("td");
-        tdShift.textContent = shift === "morning" ? "Mattina" : "Sera";
+        tdShift.textContent = shiftLabel(shift);
 
         const tdTime = document.createElement("td");
         tdTime.textContent = slot.time ?? "";
@@ -1045,12 +1076,12 @@ let saveTimer = null;
         const totalTemps = tempKitchen.length + tempRoom.length;
         const tempFilled = countTempFilled(slot);
         const isClosed = toText(slot.time).toUpperCase() === "CHIUSO";
-        tdTemp.textContent = isClosed ? "CHIUSO" : (tempFilled + "/" + totalTemps);
+        tdTemp.textContent = isClosed ? "GESCHLOSSEN" : (tempFilled + "/" + totalTemps);
 
         const tdClean = document.createElement("td");
         const cleanChecked = countCleaning(slot);
         const cleanNA = countCleaningNotApplicable(slot);
-        tdClean.textContent = isClosed ? "CHIUSO" : (cleanNA === cleaningItems.length ? "N/D" : (cleanChecked + "/" + cleaningItems.length));
+        tdClean.textContent = isClosed ? "GESCHLOSSEN" : (cleanNA === cleaningItems.length ? "N/D" : (cleanChecked + "/" + cleaningItems.length));
 
         tr.appendChild(tdDate);
         tr.appendChild(tdShift);
@@ -1073,7 +1104,7 @@ let saveTimer = null;
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
     document.querySelector('.navbtn[data-target="temperature"]').classList.add("active");
     document.getElementById("temperature").classList.add("active");
-    document.getElementById("statusBox").textContent = "Caricato: " + date + " · " + (shift === "morning" ? "Mattina" : "Sera");
+    document.getElementById("statusBox").textContent = "Geladen: " + date + " · " + shiftLabel(shift);
   }
 
   function renderAll(){
@@ -1092,11 +1123,11 @@ let saveTimer = null;
 
   function resetCurrent(){
     ensureDate(state.selectedDate)[state.selectedShift] = emptySlot();
-    saveState("Turno azzerato · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+    saveState("Schicht zurückgesetzt · " + state.selectedDate + " · " + shiftLabel());
     renderAll();
   }
 
-  document.getElementById("todayLabel").textContent = new Date().toLocaleDateString("it-IT", {
+  document.getElementById("todayLabel").textContent = new Date().toLocaleDateString("de-DE", {
     weekday:"long", day:"2-digit", month:"long", year:"numeric"
   });
   const today = new Date();
@@ -1108,13 +1139,13 @@ let saveTimer = null;
     ensureDate(state.selectedDate);
     renderAll();
     document.getElementById("quickStart").scrollIntoView({behavior:"smooth", block:"start"});
-    saveState("Giorno aperto: scegli Mattina o Sera");
+    saveState("Tag geöffnet: Morgen oder Abend wählen");
   });
 
   document.getElementById("timeInput").addEventListener("change", e => {
     state.selectedTime = e.target.value;
     currentSlot().time = e.target.value;
-    saveState("Ora aggiornata · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+    saveState("Zeit aktualisiert · " + state.selectedDate + " · " + shiftLabel());
     renderHistory();
   });
 
@@ -1124,12 +1155,12 @@ let saveTimer = null;
 
   document.getElementById("notesInput").addEventListener("input", e => {
     currentSlot().notes = e.target.value;
-    saveState("Note aggiornate · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+    saveState("Notizen aktualisiert · " + state.selectedDate + " · " + shiftLabel());
   });
 
   document.getElementById("saveBtn").addEventListener("click", () => {
     currentSlot().time = document.getElementById("timeInput").value || "";
-    saveState("Turno salvato · " + state.selectedDate + " · " + (state.selectedShift === "morning" ? "Mattina" : "Sera"));
+    saveState("Schicht gespeichert · " + state.selectedDate + " · " + shiftLabel());
     renderHistory();
   });
 
@@ -1140,9 +1171,9 @@ let saveTimer = null;
     renderAll();
     if(res.changed){
       document.getElementById("statusBox").textContent =
-        "Ripristino: " + res.createdDays + " giorni aggiunti, " + res.closedSlots + " turni chiusi, " + res.filledSlots + " turni compilati N/D";
+        "Wiederherstellung: " + res.createdDays + " Tage hinzugefügt, " + res.closedSlots + " Schichten geschlossen, " + res.filledSlots + " Schichten N/D ausgefüllt";
     }else{
-      document.getElementById("statusBox").textContent = "Nessun giorno mancante da gennaio a oggi";
+      document.getElementById("statusBox").textContent = "Kein fehlender Tag von Januar bis heute";
     }
   });
   document.getElementById("demoBtn").addEventListener("click", loadClientDemo);
@@ -1199,14 +1230,14 @@ let saveTimer = null;
       try{
         state = Object.assign(defaultState(), JSON.parse(ev.target.result));
         const restored = fillMissingFromJanuary({persist:false});
-        saveState("Backup importato");
+        saveState("Backup importiert");
         if(restored.changed){
           document.getElementById("statusBox").textContent =
-            "Backup importato · " + restored.createdDays + " giorni aggiunti, " + restored.closedSlots + " chiusi, " + restored.filledSlots + " N/D";
+            "Backup importiert · " + restored.createdDays + " Tage hinzugefügt, " + restored.closedSlots + " geschlossen, " + restored.filledSlots + " N/D";
         }
         renderAll();
       }catch(err){
-        document.getElementById("statusBox").textContent = "Backup non valido";
+        document.getElementById("statusBox").textContent = "Backup ungültig";
       }
     };
     reader.readAsText(file);
@@ -1214,10 +1245,10 @@ let saveTimer = null;
 
   async function startCloudSync(){
     if(state.demoMode){
-      document.getElementById("statusBox").textContent = "Modalità demo cliente attiva · Firebase disattivato";
+      document.getElementById("statusBox").textContent = "Kunden-Demo aktiv · Firebase deaktiviert";
       return;
     }
-    document.getElementById("statusBox").textContent = "Collegamento Firebase...";
+    document.getElementById("statusBox").textContent = "Firebase wird verbunden...";
     try{
       const snap = await getDoc(cloudDocRef);
       if(snap.exists()){
@@ -1228,12 +1259,12 @@ let saveTimer = null;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           renderAll();
           document.getElementById("statusBox").textContent = restored.changed
-            ? "Dati Firebase · " + restored.createdDays + " giorni aggiunti, " + restored.closedSlots + " chiusi, " + restored.filledSlots + " N/D"
-            : "Dati caricati da Firebase · Online";
+            ? "Firebase-Daten · " + restored.createdDays + " Tage hinzugefügt, " + restored.closedSlots + " geschlossen, " + restored.filledSlots + " N/D"
+            : "Daten aus Firebase geladen · Online";
         }
       }else{
         await saveCloudNow();
-        document.getElementById("statusBox").textContent = "Firebase pronto · Primo salvataggio creato";
+        document.getElementById("statusBox").textContent = "Firebase bereit · Erste Speicherung erstellt";
       }
       cloudReady = true;
 
@@ -1250,11 +1281,11 @@ let saveTimer = null;
         applyingRemote = false;
       }, err => {
         console.error("Errore sincronizzazione Firebase:", err);
-        document.getElementById("statusBox").textContent = "Errore sincronizzazione Firebase";
+        document.getElementById("statusBox").textContent = "Fehler bei der Firebase-Synchronisierung";
       });
     }catch(err){
       console.error("Firebase non collegato:", err);
-      document.getElementById("statusBox").textContent = "Offline o Rules bloccate: dati salvati solo su questo dispositivo";
+      document.getElementById("statusBox").textContent = "Offline oder Regeln blockiert: Daten nur auf diesem Gerät gespeichert";
     }
   }
 
@@ -1262,7 +1293,7 @@ let saveTimer = null;
   renderAll();
   if(bootFill.changed){
     document.getElementById("statusBox").textContent =
-      "Compilazione iniziale: " + bootFill.createdDays + " giorni aggiunti, " + bootFill.closedSlots + " chiusi, " + bootFill.filledSlots + " N/D";
+      "Erstausfüllung: " + bootFill.createdDays + " Tage hinzugefügt, " + bootFill.closedSlots + " geschlossen, " + bootFill.filledSlots + " N/D";
   }
   startCloudSync();
 })();
