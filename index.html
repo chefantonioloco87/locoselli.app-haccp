@@ -29,15 +29,18 @@
     input,select,textarea{width:100%;padding:10px 11px;border-radius:12px;border:1px solid var(--line);background:#171a21;color:var(--text)}
     button{padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--text);cursor:pointer}
     .gold{background:linear-gradient(180deg,#d3b06a,#af8944);color:#111;border:none;font-weight:700}
-    .layout{display:grid;grid-template-columns:280px 1fr;gap:14px;margin-top:14px}
+    .layout{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
     .side,.main{background:var(--card);border:1px solid var(--line);border-radius:18px}
-    .side{padding:10px}
+    .side{display:none}
     .navbtn{display:block;width:100%;text-align:left;padding:12px;border-radius:12px;border:1px solid transparent;background:transparent;color:var(--text)}
     .navbtn.active{background:var(--card2);border-color:rgba(201,164,92,.25);color:#e7ca8c}
     .navbtn+.navbtn{margin-top:8px}
     .main{padding:14px}
-    .section{display:none}
-    .section.active{display:block}
+    .section{display:block}
+    details.section{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-top:12px;overflow:hidden}
+    details.section summary{list-style:none;padding:16px;font-weight:800;color:#e7ca8c;cursor:pointer}
+    details.section summary::-webkit-details-marker{display:none}
+    details.section .panel, details.section .grid2{margin:0 14px 14px}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .panel{padding:12px}
     .row{display:grid;grid-template-columns:1fr;gap:10px;align-items:center;margin:10px 0}
@@ -56,6 +59,27 @@
     .quick-shift{font-size:18px;min-height:58px}
     .quick-shift.active{background:linear-gradient(180deg,#d3b06a,#af8944);color:#111;border:none}
     .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .primary-auto{font-size:22px;min-height:76px}
+    .wizard-card{margin-top:12px;background:#171a21;border:1px solid rgba(201,164,92,.28);border-radius:16px;padding:16px}
+    .wizard-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+    .wizard-step{color:#e7ca8c;font-weight:800}
+    .wizard-title{font-size:24px;line-height:1.2;margin:10px 0 6px;font-weight:850}
+    .wizard-hint{color:var(--muted);line-height:1.45}
+    .wizard-choices{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+    .wizard-choices .choicebtn{min-height:62px;font-size:18px}
+    .wizard-choices .yes,.wizard-choices .no{font-size:22px}
+    .wizard-nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .today-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+    .summary-card{background:#171a21;border:1px solid var(--line);border-radius:14px;padding:14px}
+    .summary-card strong{display:block;font-size:26px;color:#e7ca8c;margin-top:4px}
+    .overview-list{display:grid;gap:8px;margin-top:12px}
+    .day-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:10px;border-radius:12px;background:#171a21;border:1px solid var(--line);cursor:pointer}
+    .day-row.selected{border-color:rgba(201,164,92,.65);background:#242936}
+    .badge{display:inline-flex;align-items:center;justify-content:center;min-width:72px;padding:7px 9px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid var(--line)}
+    .badge.done{background:rgba(31,139,77,.18);border-color:rgba(31,139,77,.45);color:#9ae3b6}
+    .badge.open{background:rgba(180,60,60,.16);border-color:rgba(180,60,60,.38);color:#ffb8b8}
+    .badge.closed{background:rgba(180,172,157,.12);border-color:rgba(180,172,157,.28);color:var(--muted)}
+    .small-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
     .quick-note{margin-top:10px;color:var(--muted);font-size:14px;line-height:1.45}
     .chip{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px}
     .ok{background:rgba(31,139,77,.16);border-color:rgba(31,139,77,.35);color:#9ae3b6}
@@ -72,6 +96,8 @@
     .status{margin-top:12px;padding:10px 12px;border-radius:12px;background:#14171d;border:1px solid var(--line);color:#e7ca8c}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
     .quickfill{margin-top:12px}
+    .advanced-tools{margin-top:12px;background:transparent;border:none;padding:0}
+    .advanced-tools summary{cursor:pointer;color:var(--muted);padding:10px 0;font-weight:700}
     .bulkgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .inlineCheck{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#171a21;color:var(--text)}
     .inlineCheck input{width:auto}
@@ -80,6 +106,8 @@
       .toolbar,.layout,.grid2,.checkgrid{grid-template-columns:1fr}
       .temp-options{grid-template-columns:repeat(3,1fr)}
       .quick-actions{grid-template-columns:1fr}
+      .wizard-choices{grid-template-columns:repeat(2,1fr)}
+      .small-actions,.today-summary,.day-row{grid-template-columns:1fr}
       .bulkgrid{grid-template-columns:1fr}
     }
   </style>
@@ -96,10 +124,6 @@
         </div>
       </div>
       <div class="actions">
-        <button type="button" id="exportBtn">Backup exportieren</button>
-        <button type="button" id="importBtn">Backup importieren</button>
-        <input type="file" id="importFile" accept=".json" hidden>
-        <button type="button" id="demoBtn">Kunden-Demo</button>
         <button type="button" class="gold" onclick="window.print()">Drucken / PDF</button>
       </div>
     </div>
@@ -129,47 +153,65 @@
     <div class="status" id="statusBox">Bereit.</div>
 
     <div class="tile quick-start" id="quickStart">
-      <h3>Täglicher Schnellstart</h3>
-      <div class="muted" id="quickPrompt">Tag öffnen, Morgen oder Abend wählen, dann Temperaturen und Reinigungen antippen.</div>
+      <h3>Geführte HACCP-Kontrolle</h3>
+      <div class="muted" id="quickPrompt">Schicht wählen, dann beantwortet die App eine Frage nach der anderen.</div>
       <div class="quick-shifts">
         <button type="button" class="quick-shift" id="quickMorning">Morgen</button>
         <button type="button" class="quick-shift" id="quickEvening">Abend</button>
       </div>
-      <div class="quick-actions">
-        <button type="button" id="quickTempsOk">Temperaturen automatisch OK</button>
-        <button type="button" id="quickCleaningYes">Alle Reinigungen JA</button>
-        <button type="button" class="gold" id="quickSaveBtn">Ausfüllen und speichern</button>
-        <button type="button" id="quickNextShiftBtn">Zur anderen Schicht</button>
+      <div class="wizard-card">
+        <div class="wizard-top">
+          <div class="wizard-step" id="wizardStep">Frage 1</div>
+          <div class="muted" id="wizardMode">Morgen: nur Temperaturen</div>
+        </div>
+        <div class="wizard-title" id="wizardTitle">Temperatur wählen</div>
+        <div class="wizard-hint" id="wizardHint">Tippe den gemessenen Wert an.</div>
+        <div class="wizard-choices" id="wizardChoices"></div>
+        <div class="wizard-nav">
+          <button type="button" id="wizardBackBtn">Zurück</button>
+          <button type="button" class="gold" id="wizardFinishBtn">Speichern</button>
+        </div>
       </div>
-      <div class="quick-note">Für die normale Kontrolle reichen wenige Klicks: Schicht wählen, Temperaturen über die Tasten prüfen, Reinigungen mit JA/NEIN bestätigen und speichern.</div>
+      <div class="today-summary">
+        <div class="summary-card">Temperaturen<strong id="summaryTemps">0/0</strong></div>
+        <div class="summary-card">Reinigung<strong id="summaryCleaning">0/0</strong></div>
+        <div class="summary-card">Status<strong id="summaryStatus">Offen</strong></div>
+      </div>
+      <div class="small-actions">
+        <button type="button" id="quickTempsOk">Temperaturen OK</button>
+        <button type="button" id="quickCleaningYes">Abend Reinigung JA</button>
+        <button type="button" id="openTempsBtn">Temperaturen ändern</button>
+        <button type="button" id="openDaysBtn">Tage ansehen</button>
+      </div>
+      <div class="quick-note">Morgen: nur Temperaturen. Abend: Temperaturen, Reinigung und Geräte. Bei Problemen kannst du unten die Details öffnen.</div>
     </div>
 
-    <div class="tile quickfill">
-      <h3>Schnellausfüllung (echte Werte)</h3>
-      <div class="bulkgrid">
-        <input type="date" id="bulkFromInput">
-        <input type="date" id="bulkToInput">
-        <label class="inlineCheck"><input type="checkbox" id="bulkTemps" checked> Temperaturen</label>
-        <label class="inlineCheck"><input type="checkbox" id="bulkCleaning" checked> Reinigungen</label>
+    <details class="advanced-tools">
+      <summary>Backup und schnelle Nachträge</summary>
+      <div class="tile quickfill">
+        <h3>Schnellausfüllung (echte Werte)</h3>
+        <div class="bulkgrid">
+          <input type="date" id="bulkFromInput">
+          <input type="date" id="bulkToInput">
+          <label class="inlineCheck"><input type="checkbox" id="bulkTemps" checked> Temperaturen</label>
+          <label class="inlineCheck"><input type="checkbox" id="bulkCleaning" checked> Reinigungen</label>
+        </div>
+        <div class="actions" style="margin-top:10px">
+          <button type="button" id="copyPrevBtn">Letzte ähnliche Schicht kopieren</button>
+          <button type="button" id="applyRangeBtn">Auf ausgewählte Tage anwenden</button>
+          <button type="button" id="exportBtn">Backup exportieren</button>
+          <button type="button" id="importBtn">Backup importieren</button>
+          <input type="file" id="importFile" accept=".json" hidden>
+          <button type="button" id="demoBtn">Kunden-Demo</button>
+        </div>
       </div>
-      <div class="actions" style="margin-top:10px">
-        <button type="button" id="copyPrevBtn">Letzte ähnliche Schicht kopieren</button>
-        <button type="button" id="applyRangeBtn">Auf ausgewählte Tage anwenden</button>
-      </div>
-    </div>
+    </details>
   </div>
 
   <div class="layout">
-    <div class="side">
-      <button type="button" class="navbtn active" data-target="temperature">🌡️ Temperaturen</button>
-      <button type="button" class="navbtn" data-target="cleaning">🧼 Reinigung</button>
-      <button type="button" class="navbtn" data-target="equipment">⚙️ Geräte</button>
-      <button type="button" class="navbtn" data-target="notes">📝 Notizen</button>
-      <button type="button" class="navbtn" data-target="history">📚 Verlauf</button>
-    </div>
-
     <div class="main">
-      <section id="temperature" class="section active">
+      <details id="temperature" class="section">
+        <summary>Temperaturen manuell ändern</summary>
         <div class="grid2">
           <div class="panel">
             <h3>Küche</h3>
@@ -180,30 +222,36 @@
             <div id="tempsRoom"></div>
           </div>
         </div>
-      </section>
+      </details>
 
-      <section id="cleaning" class="section">
+      <details id="cleaning" class="section">
+        <summary>Reinigung manuell ändern</summary>
         <div class="panel">
+          <h3>Wareneingang / Lieferanten</h3>
+          <div id="suppliersGrid" class="checkgrid" style="margin-bottom:12px"></div>
           <h3>Reinigung</h3>
           <div id="cleaningGrid" class="checkgrid"></div>
         </div>
-      </section>
+      </details>
 
-      <section id="equipment" class="section">
+      <details id="equipment" class="section">
+        <summary>Geräte kontrollieren</summary>
         <div class="panel">
           <h3>Geräte</h3>
           <div id="equipmentGrid" class="checkgrid"></div>
         </div>
-      </section>
+      </details>
 
-      <section id="notes" class="section">
+      <details id="notes" class="section">
+        <summary>Notizen / Problem eintragen</summary>
         <div class="panel">
           <h3>Notizen</h3>
           <textarea id="notesInput" placeholder="Notizen, Probleme, Korrekturmaßnahmen..."></textarea>
         </div>
-      </section>
+      </details>
 
-      <section id="history" class="section">
+      <details id="history" class="section">
+        <summary>Verlauf anzeigen</summary>
         <div class="panel">
           <h3>Verlauf</h3>
           <div class="muted" style="margin-bottom:10px">Zum Laden direkt auf eine Zeile tippen.</div>
@@ -222,13 +270,25 @@
             </table>
           </div>
         </div>
-      </section>
+      </details>
 
-      <div class="actions">
-        <button type="button" class="gold" id="saveBtn">Schicht speichern</button>
-        <button type="button" id="resetBtn">Schicht zurücksetzen</button>
-        <button type="button" id="fillJanBtn">Ab Januar ausfüllen</button>
-      </div>
+      <details id="dayOverview" class="section" open>
+        <summary>Monatsübersicht: fertige und offene Tage</summary>
+        <div class="panel">
+          <h3>Monatsübersicht</h3>
+          <div class="muted" id="monthSummary" style="margin-bottom:10px">Fertige Tage werden grün angezeigt.</div>
+          <div id="dayOverviewList" class="overview-list"></div>
+        </div>
+      </details>
+
+      <details class="advanced-tools">
+        <summary>Weitere Aktionen</summary>
+        <div class="actions">
+          <button type="button" class="gold" id="saveBtn">Schicht speichern</button>
+          <button type="button" id="resetBtn">Schicht zurücksetzen</button>
+          <button type="button" id="fillJanBtn">Ab Januar ausfüllen</button>
+        </div>
+      </details>
     </div>
   </div>
 </div>
@@ -263,6 +323,7 @@ let saveTimer = null;
 
 (function(){
   const STORAGE_KEY = "locoselli_haccp_v9";
+  let wizardIndex = 0;
 
   const tempKitchen = [
     {key:"cellaVerdure", label:"Kühlhaus Gemüse", min:0, max:4},
@@ -317,10 +378,10 @@ let saveTimer = null;
     const temps = {};
     [...tempKitchen, ...tempRoom].forEach(t => temps[t.key] = "");
     const cleaning = {};
-    cleaningItems.forEach(i => cleaning[i] = false);
+    cleaningItems.forEach(i => cleaning[i] = null);
     const equipment = {};
-    equipmentItems.forEach(i => equipment[i] = {clean:false, ok:false});
-    return {time:"", temps, cleaning, equipment, notes:""};
+    equipmentItems.forEach(i => equipment[i] = {clean:null, ok:null});
+    return {time:"", temps, cleaning, equipment, suppliers:null, notes:""};
   }
 
   function defaultState(){
@@ -328,7 +389,7 @@ let saveTimer = null;
     return {
       selectedDate: now.toISOString().slice(0,10),
       selectedTime: now.toTimeString().slice(0,5),
-      selectedShift: "morning",
+      selectedShift: now.getHours() < 15 ? "morning" : "evening",
       demoMode: false,
       records: {}
     };
@@ -393,6 +454,7 @@ let saveTimer = null;
   }
 
   function ensureSlotShape(slot){
+    const hadSuppliers = Object.prototype.hasOwnProperty.call(slot, "suppliers");
     if(!slot.temps || typeof slot.temps !== "object") slot.temps = {};
     [...tempKitchen, ...tempRoom].forEach(item => {
       if(slot.temps[item.key] === undefined || slot.temps[item.key] === null){
@@ -404,20 +466,28 @@ let saveTimer = null;
 
     if(!slot.cleaning || typeof slot.cleaning !== "object") slot.cleaning = {};
     cleaningItems.forEach(name => {
-      if(slot.cleaning[name] === undefined) slot.cleaning[name] = false;
+      if(slot.cleaning[name] === undefined) slot.cleaning[name] = null;
     });
 
     if(!slot.equipment || typeof slot.equipment !== "object") slot.equipment = {};
     equipmentItems.forEach(name => {
       if(!slot.equipment[name] || typeof slot.equipment[name] !== "object"){
-        slot.equipment[name] = {clean:false, ok:false};
+        slot.equipment[name] = {clean:null, ok:null};
         return;
       }
-      if(slot.equipment[name].clean === undefined) slot.equipment[name].clean = false;
-      if(slot.equipment[name].ok === undefined) slot.equipment[name].ok = false;
+      if(slot.equipment[name].clean === undefined) slot.equipment[name].clean = null;
+      if(slot.equipment[name].ok === undefined) slot.equipment[name].ok = null;
     });
 
     slot.time = toText(slot.time);
+    if(!hadSuppliers){
+      const hasLegacyContent =
+        toText(slot.time) !== "" ||
+        Object.values(slot.temps || {}).some(v => toText(v) !== "") ||
+        toText(slot.notes) !== "";
+      slot.suppliers = hasLegacyContent ? "none" : null;
+    }
+    if(slot.suppliers === undefined) slot.suppliers = null;
     slot.notes = toText(slot.notes);
   }
 
@@ -806,11 +876,47 @@ let saveTimer = null;
     return shift === "morning" ? "09:30" : "18:30";
   }
 
+  function wizardSteps(){
+    const steps = [];
+    [...tempKitchen, ...tempRoom].forEach(item => steps.push({type:"temp", item}));
+    if(state.selectedShift === "evening"){
+      steps.push({type:"suppliers"});
+      cleaningItems.forEach(name => steps.push({type:"cleaning", name}));
+      equipmentItems.forEach(name => steps.push({type:"equipment", name}));
+    }
+    return steps;
+  }
+
+  function firstOpenWizardIndex(){
+    const slot = currentSlot();
+    ensureSlotShape(slot);
+    const steps = wizardSteps();
+    const idx = steps.findIndex(step => {
+      if(step.type === "temp"){
+        const value = toText(slot.temps[step.item.key]).toUpperCase();
+        return value === "" || value === "N/D" || value === "ND";
+      }
+      if(step.type === "cleaning") return slot.cleaning[step.name] !== true && slot.cleaning[step.name] !== false;
+      if(step.type === "equipment"){
+        const item = slot.equipment[step.name] || {};
+        return item.clean !== true && item.clean !== false;
+      }
+      if(step.type === "suppliers") return slot.suppliers === null || slot.suppliers === undefined;
+      return false;
+    });
+    return idx === -1 ? steps.length : idx;
+  }
+
+  function resetWizard(toFirstOpen = true){
+    wizardIndex = toFirstOpen ? firstOpenWizardIndex() : 0;
+  }
+
   function markQuickShift(){
     document.getElementById("quickMorning").classList.toggle("active", state.selectedShift === "morning");
     document.getElementById("quickEvening").classList.toggle("active", state.selectedShift === "evening");
     document.getElementById("quickPrompt").textContent =
-      state.selectedDate + " · " + shiftLabel() + " · Temperaturen und Reinigungen wählen, dann speichern.";
+      state.selectedDate + " · " + shiftLabel() + " · " + (state.selectedShift === "morning" ? "nur Temperaturen." : "Temperaturen, Reinigung und Geräte.");
+    document.getElementById("wizardMode").textContent = state.selectedShift === "morning" ? "Morgen: nur Temperaturen" : "Abend: Temperaturen + Reinigung + Geräte";
   }
 
   function selectShift(shift, msg = true){
@@ -821,6 +927,7 @@ let saveTimer = null;
       slot.time = defaultTimeForShift(shift);
       state.selectedTime = slot.time;
     }
+    resetWizard();
     renderAll();
     if(msg){
       saveState("Schicht ausgewählt · " + state.selectedDate + " · " + shiftLabel(shift));
@@ -853,15 +960,30 @@ let saveTimer = null;
     equipmentItems.forEach(name => {
       slot.equipment[name] = {clean:true, ok:true};
     });
+    if(state.selectedShift === "evening" && slot.suppliers === null) slot.suppliers = "ok";
     saveState("Reinigungen mit JA bestätigt · " + state.selectedDate + " · " + shiftLabel());
     renderAll();
   }
 
   function completeQuickTurn(){
-    fillQuickTempsOk();
-    fillQuickCleaningYes();
-    currentSlot().time = document.getElementById("timeInput").value || currentSlot().time || defaultTimeForShift(state.selectedShift);
-    saveState("Schicht ausgefüllt und gespeichert · " + state.selectedDate + " · " + shiftLabel());
+    const slot = currentSlot();
+    ensureSlotShape(slot);
+    [...tempKitchen, ...tempRoom].forEach(item => {
+      const cur = toText(slot.temps[item.key]).toUpperCase();
+      if(cur === "" || cur === "N/D" || cur === "ND"){
+        slot.temps[item.key] = defaultTempValue(item);
+      }
+    });
+    cleaningItems.forEach(name => {
+      slot.cleaning[name] = true;
+    });
+    equipmentItems.forEach(name => {
+      slot.equipment[name] = {clean:true, ok:true};
+    });
+    slot.time = document.getElementById("timeInput").value || slot.time || defaultTimeForShift(state.selectedShift);
+    state.selectedTime = slot.time;
+    saveState("Alles gespeichert · " + state.selectedDate + " · " + shiftLabel());
+    resetWizard();
     renderAll();
   }
 
@@ -882,6 +1004,331 @@ let saveTimer = null;
 
   function countCleaningNotApplicable(slot){
     return Object.values(slot.cleaning).filter(v => v === null).length;
+  }
+
+  function tempsAnswered(slot){
+    ensureSlotShape(slot);
+    return [...tempKitchen, ...tempRoom].every(item => toText(slot.temps[item.key]) !== "");
+  }
+
+  function cleaningAnswered(slot){
+    ensureSlotShape(slot);
+    return cleaningItems.every(name => slot.cleaning[name] === true || slot.cleaning[name] === false || slot.cleaning[name] === null);
+  }
+
+  function eveningCleaningAnswered(slot){
+    ensureSlotShape(slot);
+    return cleaningItems.every(name => slot.cleaning[name] === true || slot.cleaning[name] === false);
+  }
+
+  function equipmentAnswered(slot){
+    ensureSlotShape(slot);
+    return equipmentItems.every(name => {
+      const item = slot.equipment[name] || {};
+      return item.clean === true || item.clean === false || item.ok === true || item.ok === false;
+    });
+  }
+
+  function suppliersAnswered(slot){
+    ensureSlotShape(slot);
+    return slot.suppliers === "ok" || slot.suppliers === "none" || slot.suppliers === "problem";
+  }
+
+  function isRecoveredSlot(slot){
+    const note = toText(slot.notes);
+    return note === "Compilazione automatica: dati mancanti" ||
+      note === "Automatische Ausfüllung: fehlende Daten" ||
+      note === "Locale chiuso" ||
+      note === "Betrieb geschlossen" ||
+      note === "Bozza: sostituire con valori reali";
+  }
+
+  function isShiftComplete(slot, shift){
+    ensureSlotShape(slot);
+    if(toText(slot.time).toUpperCase() === "CHIUSO") return true;
+    if(toText(slot.time) === "" || !tempsAnswered(slot)) return false;
+    if(isRecoveredSlot(slot)) return true;
+    if(shift === "morning") return true;
+    return suppliersAnswered(slot) && eveningCleaningAnswered(slot) && equipmentAnswered(slot);
+  }
+
+  function cloneData(value){
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function shouldReplaceWithSeed(current, incoming){
+    ensureSlotShape(current);
+    ensureSlotShape(incoming);
+    if(isSlotEmpty(current)) return true;
+    if(isRecoveredSlot(current) && isRecoveredSlot(incoming)) return true;
+    if(!tempsAnswered(current) && tempsAnswered(incoming)) return true;
+    return false;
+  }
+
+  async function mergeSeedRecords(){
+    try{
+      const response = await fetch("seed-records.json", {cache:"no-store"});
+      if(!response.ok) return 0;
+      const seed = await response.json();
+      const records = seed.records || {};
+      let added = 0;
+      Object.keys(records).forEach(date => {
+        if(!state.records[date]){
+          state.records[date] = cloneData(records[date]);
+          ["morning","evening"].forEach(shift => ensureSlotShape(state.records[date][shift]));
+          added += 1;
+          return;
+        }
+        ["morning","evening"].forEach(shift => {
+          if(!records[date][shift]) return;
+          const incoming = cloneData(records[date][shift]);
+          const current = ensureDate(date)[shift];
+          if(shouldReplaceWithSeed(current, incoming)){
+            state.records[date][shift] = incoming;
+            ensureSlotShape(state.records[date][shift]);
+            added += 1;
+          }
+        });
+      });
+      return added;
+    }catch(err){
+      console.warn("Seed records not loaded:", err);
+      return 0;
+    }
+  }
+
+  function dayCompletion(date){
+    const rec = ensureDate(date);
+    const closed = isClosedDayByKey(date);
+    const morningDone = closed || isShiftComplete(rec.morning, "morning");
+    const eveningDone = closed || isShiftComplete(rec.evening, "evening");
+    return {
+      closed,
+      morningDone,
+      eveningDone,
+      done: morningDone && eveningDone
+    };
+  }
+
+  function renderSummary(){
+    const slot = currentSlot();
+    ensureSlotShape(slot);
+    const totalTemps = tempKitchen.length + tempRoom.length;
+    const okTemps = countTempOk(slot);
+    const totalCleaning = cleaningItems.length;
+    const cleanYes = countCleaning(slot);
+    const hasTime = toText(slot.time) !== "";
+    const equipmentOk = equipmentItems.every(name => {
+      const item = slot.equipment[name] || {};
+      return item.clean === true && item.ok === true;
+    });
+    const suppliersOk = state.selectedShift === "morning" || suppliersAnswered(slot);
+    const complete = state.selectedShift === "morning"
+      ? okTemps === totalTemps && hasTime
+      : okTemps === totalTemps && suppliersOk && cleanYes === totalCleaning && equipmentOk && hasTime;
+    document.getElementById("summaryTemps").textContent = okTemps + "/" + totalTemps;
+    document.getElementById("summaryCleaning").textContent = state.selectedShift === "morning" ? "—" : (cleanYes + "/" + totalCleaning);
+    document.getElementById("summaryStatus").textContent = complete ? "Fertig" : "Offen";
+  }
+
+  function renderDayOverview(){
+    const list = document.getElementById("dayOverviewList");
+    const summary = document.getElementById("monthSummary");
+    if(!list || !summary) return;
+    list.innerHTML = "";
+
+    const selected = keyToDate(state.selectedDate);
+    const start = new Date(selected.getFullYear(), selected.getMonth(), 1);
+    const end = new Date(selected.getFullYear(), selected.getMonth() + 1, 0);
+    const todayKey = dateKey(new Date());
+    const dates = [];
+    for(const d = new Date(end); d >= start; d.setDate(d.getDate() - 1)){
+      const key = dateKey(d);
+      if(key > todayKey) continue;
+      dates.push(key);
+    }
+
+    let doneDays = 0;
+    dates.forEach(date => {
+      const status = dayCompletion(date);
+      if(status.done) doneDays += 1;
+
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "day-row" + (date === state.selectedDate ? " selected" : "");
+      row.addEventListener("click", () => {
+        state.selectedDate = date;
+        state.selectedShift = status.morningDone && !status.eveningDone ? "evening" : "morning";
+        resetWizard();
+        renderAll();
+        document.getElementById("quickStart").scrollIntoView({behavior:"smooth", block:"start"});
+        saveState("Tag geladen · " + date);
+      });
+
+      const label = document.createElement("strong");
+      label.textContent = date;
+      const morning = statusBadge(status.closed ? "Geschlossen" : (status.morningDone ? "Morgen OK" : "Morgen offen"), status.closed ? "closed" : (status.morningDone ? "done" : "open"));
+      const evening = statusBadge(status.closed ? "Geschlossen" : (status.eveningDone ? "Abend OK" : "Abend offen"), status.closed ? "closed" : (status.eveningDone ? "done" : "open"));
+      const day = statusBadge(status.done ? "Fertig" : "Offen", status.done ? "done" : "open");
+
+      row.appendChild(label);
+      row.appendChild(morning);
+      row.appendChild(evening);
+      row.appendChild(day);
+      list.appendChild(row);
+    });
+
+    summary.textContent = doneDays + " von " + dates.length + " Tagen in diesem Monat fertig.";
+  }
+
+  function statusBadge(text, cls){
+    const badge = document.createElement("span");
+    badge.className = "badge " + cls;
+    badge.textContent = text;
+    return badge;
+  }
+
+  function renderWizard(){
+    const slot = currentSlot();
+    ensureSlotShape(slot);
+    const steps = wizardSteps();
+    const title = document.getElementById("wizardTitle");
+    const hint = document.getElementById("wizardHint");
+    const stepLabel = document.getElementById("wizardStep");
+    const choices = document.getElementById("wizardChoices");
+    choices.innerHTML = "";
+
+    if(wizardIndex >= steps.length){
+      stepLabel.textContent = "Fertig";
+      title.textContent = state.selectedShift === "morning" ? "Morgenkontrolle fertig" : "Abendkontrolle fertig";
+      hint.textContent = "Tippe Speichern, damit alles online gesichert wird.";
+      const done = document.createElement("button");
+      done.type = "button";
+      done.className = "choicebtn yes";
+      done.textContent = "Speichern";
+      done.addEventListener("click", () => finishWizard());
+      choices.appendChild(done);
+      return;
+    }
+
+    const step = steps[wizardIndex];
+    stepLabel.textContent = "Frage " + (wizardIndex + 1) + " / " + steps.length;
+
+    if(step.type === "temp"){
+      title.textContent = step.item.label;
+      hint.textContent = "Welche Temperatur wurde gemessen?";
+      tempOptions(step.item).forEach(value => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "choicebtn";
+        btn.textContent = value === "CHIUSO" ? "Geschlossen" : (value === "N/D" ? "N/D" : value + "°");
+        if(toText(slot.temps[step.item.key]).toUpperCase() === value) btn.classList.add("active");
+        btn.addEventListener("click", () => {
+          slot.temps[step.item.key] = value;
+          if(toText(slot.time) === ""){
+            slot.time = defaultTimeForShift(state.selectedShift);
+            state.selectedTime = slot.time;
+          }
+          wizardIndex += 1;
+          saveState("Temperatur gewählt · " + step.item.label + " · " + state.selectedDate + " · " + shiftLabel());
+          renderAll();
+        });
+        choices.appendChild(btn);
+      });
+      return;
+    }
+
+    if(step.type === "cleaning"){
+      title.textContent = displayCleaning(step.name);
+      hint.textContent = "Wurde diese Reinigung gemacht?";
+      addYesNoButtons(choices, slot.cleaning[step.name], value => {
+        slot.cleaning[step.name] = value;
+        wizardIndex += 1;
+        saveState("Reinigung " + (value ? "JA" : "NEIN") + " · " + displayCleaning(step.name) + " · " + state.selectedDate + " · " + shiftLabel());
+        renderAll();
+      });
+      return;
+    }
+
+    if(step.type === "suppliers"){
+      title.textContent = "Wareneingang / Lieferanten";
+      hint.textContent = "Sind heute Lieferanten gekommen und war alles in Ordnung?";
+      addSupplierButtons(choices, slot.suppliers, value => {
+        slot.suppliers = value;
+        wizardIndex += 1;
+        saveState("Wareneingang · " + supplierLabel(value) + " · " + state.selectedDate + " · " + shiftLabel());
+        renderAll();
+      });
+      return;
+    }
+
+    if(step.type === "equipment"){
+      title.textContent = displayEquipment(step.name);
+      hint.textContent = "Ist das Gerät sauber und kontrolliert?";
+      const current = slot.equipment[step.name] || {clean:false, ok:false};
+      const currentAnswer = current.clean === true && current.ok === true ? true : ((current.clean === false || current.ok === false) ? false : null);
+      addYesNoButtons(choices, currentAnswer, value => {
+        slot.equipment[step.name] = {clean:value, ok:value};
+        wizardIndex += 1;
+        saveState("Gerät " + (value ? "OK" : "NEIN") + " · " + displayEquipment(step.name) + " · " + state.selectedDate + " · " + shiftLabel());
+        renderAll();
+      });
+    }
+  }
+
+  function addYesNoButtons(box, currentValue, onChoice){
+    const yes = document.createElement("button");
+    yes.type = "button";
+    yes.className = "choicebtn yes" + (currentValue === true ? " active" : "");
+    yes.textContent = "JA";
+    yes.addEventListener("click", () => onChoice(true));
+    const no = document.createElement("button");
+    no.type = "button";
+    no.className = "choicebtn no" + (currentValue === false ? " active" : "");
+    no.textContent = "NEIN";
+    no.addEventListener("click", () => onChoice(false));
+    box.appendChild(yes);
+    box.appendChild(no);
+  }
+
+  function addSupplierButtons(box, currentValue, onChoice){
+    [
+      {value:"ok", text:"OK"},
+      {value:"none", text:"Kein Lieferant"},
+      {value:"problem", text:"Problem", cls:"no"}
+    ].forEach(option => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "choicebtn " + (option.cls || "yes") + (currentValue === option.value ? " active" : "");
+      btn.textContent = option.text;
+      btn.addEventListener("click", () => onChoice(option.value));
+      box.appendChild(btn);
+    });
+  }
+
+  function supplierLabel(value){
+    if(value === "ok") return "OK";
+    if(value === "none") return "Kein Lieferant";
+    if(value === "problem") return "Problem";
+    return "Offen";
+  }
+
+  function finishWizard(){
+    const slot = currentSlot();
+    ensureSlotShape(slot);
+    if(toText(slot.time) === ""){
+      slot.time = defaultTimeForShift(state.selectedShift);
+      state.selectedTime = slot.time;
+    }
+    saveState("Kontrolle gespeichert · " + state.selectedDate + " · " + shiftLabel());
+    renderAll();
+  }
+
+  function openDetail(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.open = true;
+    el.scrollIntoView({behavior:"smooth", block:"start"});
   }
 
   function buildTemperatureRows(items, targetId){
@@ -946,6 +1393,7 @@ let saveTimer = null;
   }
 
   function renderCleaning(){
+    renderSuppliers();
     const box = document.getElementById("cleaningGrid");
     box.innerHTML = "";
     const slot = currentSlot();
@@ -992,6 +1440,31 @@ let saveTimer = null;
       item.appendChild(controls);
       box.appendChild(item);
     });
+  }
+
+  function renderSuppliers(){
+    const box = document.getElementById("suppliersGrid");
+    if(!box) return;
+    box.innerHTML = "";
+    const slot = currentSlot();
+    ensureSlotShape(slot);
+    const item = document.createElement("div");
+    item.className = "checkitem";
+
+    const span = document.createElement("span");
+    span.textContent = "Wareneingang / Lieferanten";
+
+    const controls = document.createElement("div");
+    controls.className = "temp-options";
+    addSupplierButtons(controls, slot.suppliers, value => {
+      slot.suppliers = value;
+      saveState("Wareneingang · " + supplierLabel(value) + " · " + state.selectedDate + " · " + shiftLabel());
+      renderAll();
+    });
+
+    item.appendChild(span);
+    item.appendChild(controls);
+    box.appendChild(item);
   }
 
   function renderEquipment(){
@@ -1099,11 +1572,9 @@ let saveTimer = null;
     document.getElementById("dateInput").value = date;
     document.getElementById("shiftInput").value = shift;
     document.getElementById("timeInput").value = ensureDate(date)[shift].time || "";
+    resetWizard();
     renderAll();
-    document.querySelectorAll(".navbtn").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-    document.querySelector('.navbtn[data-target="temperature"]').classList.add("active");
-    document.getElementById("temperature").classList.add("active");
+    openDetail("temperature");
     document.getElementById("statusBox").textContent = "Geladen: " + date + " · " + shiftLabel(shift);
   }
 
@@ -1119,6 +1590,9 @@ let saveTimer = null;
     renderNotes();
     renderHistory();
     markQuickShift();
+    renderSummary();
+    renderWizard();
+    renderDayOverview();
   }
 
   function resetCurrent(){
@@ -1137,6 +1611,7 @@ let saveTimer = null;
   document.getElementById("dateInput").addEventListener("change", e => {
     state.selectedDate = e.target.value;
     ensureDate(state.selectedDate);
+    resetWizard();
     renderAll();
     document.getElementById("quickStart").scrollIntoView({behavior:"smooth", block:"start"});
     saveState("Tag geöffnet: Morgen oder Abend wählen");
@@ -1183,10 +1658,13 @@ let saveTimer = null;
   document.getElementById("quickEvening").addEventListener("click", () => selectShift("evening"));
   document.getElementById("quickTempsOk").addEventListener("click", fillQuickTempsOk);
   document.getElementById("quickCleaningYes").addEventListener("click", fillQuickCleaningYes);
-  document.getElementById("quickSaveBtn").addEventListener("click", completeQuickTurn);
-  document.getElementById("quickNextShiftBtn").addEventListener("click", () => {
-    selectShift(state.selectedShift === "morning" ? "evening" : "morning");
+  document.getElementById("wizardBackBtn").addEventListener("click", () => {
+    wizardIndex = Math.max(0, wizardIndex - 1);
+    renderAll();
   });
+  document.getElementById("wizardFinishBtn").addEventListener("click", finishWizard);
+  document.getElementById("openTempsBtn").addEventListener("click", () => openDetail("temperature"));
+  document.getElementById("openDaysBtn").addEventListener("click", () => openDetail("dayOverview"));
 
   document.querySelectorAll(".navbtn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -1255,14 +1733,19 @@ let saveTimer = null;
         const cloud = snap.data();
         if(cloud && cloud.records){
           state.records = cloud.records;
+          const seedAdded = await mergeSeedRecords();
           const restored = fillMissingFromJanuary({persist:true});
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           renderAll();
+          if(seedAdded > 0 || restored.changed){
+            await saveCloudNow();
+          }
           document.getElementById("statusBox").textContent = restored.changed
-            ? "Firebase-Daten · " + restored.createdDays + " Tage hinzugefügt, " + restored.closedSlots + " geschlossen, " + restored.filledSlots + " N/D"
+            ? "Firebase-Daten · " + (restored.createdDays + seedAdded) + " Tage/Schichten hinzugefügt, " + restored.closedSlots + " geschlossen, " + restored.filledSlots + " N/D"
             : "Daten aus Firebase geladen · Online";
         }
       }else{
+        await mergeSeedRecords();
         await saveCloudNow();
         document.getElementById("statusBox").textContent = "Firebase bereit · Erste Speicherung erstellt";
       }
@@ -1289,13 +1772,18 @@ let saveTimer = null;
     }
   }
 
-  const bootFill = fillMissingFromJanuary({persist:true});
-  renderAll();
-  if(bootFill.changed){
-    document.getElementById("statusBox").textContent =
-      "Erstausfüllung: " + bootFill.createdDays + " Tage hinzugefügt, " + bootFill.closedSlots + " geschlossen, " + bootFill.filledSlots + " N/D";
-  }
-  startCloudSync();
+  const bootFill = fillMissingFromJanuary({persist:false});
+  mergeSeedRecords().then(seedAdded => {
+    if(seedAdded > 0 || bootFill.changed){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+    renderAll();
+    if(bootFill.changed || seedAdded > 0){
+      document.getElementById("statusBox").textContent =
+        "Erstausfüllung: " + (bootFill.createdDays + seedAdded) + " Tage/Schichten hinzugefügt, " + bootFill.closedSlots + " geschlossen, " + bootFill.filledSlots + " N/D";
+    }
+    startCloudSync();
+  });
 })();
 </script>
 </body>
