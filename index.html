@@ -73,6 +73,7 @@
     .summary-card{background:#171a21;border:1px solid var(--line);border-radius:14px;padding:14px}
     .summary-card strong{display:block;font-size:26px;color:#e7ca8c;margin-top:4px}
     .overview-list{display:grid;gap:8px;margin-top:12px}
+    .month-nav{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:10px 0}
     .day-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:10px;border-radius:12px;background:#171a21;border:1px solid var(--line);cursor:pointer}
     .day-row.selected{border-color:rgba(201,164,92,.65);background:#242936}
     .badge{display:inline-flex;align-items:center;justify-content:center;min-width:72px;padding:7px 9px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid var(--line)}
@@ -107,7 +108,7 @@
       .temp-options{grid-template-columns:repeat(3,1fr)}
       .quick-actions{grid-template-columns:1fr}
       .wizard-choices{grid-template-columns:repeat(2,1fr)}
-      .small-actions,.today-summary,.day-row{grid-template-columns:1fr}
+      .small-actions,.today-summary,.day-row,.month-nav{grid-template-columns:1fr}
       .bulkgrid{grid-template-columns:1fr}
     }
   </style>
@@ -276,6 +277,13 @@
         <summary>Monatsübersicht: fertige und offene Tage</summary>
         <div class="panel">
           <h3>Monatsübersicht</h3>
+          <div class="month-nav">
+            <button type="button" id="prevMonthBtn">← Voriger Monat</button>
+            <button type="button" id="januaryBtn">Januar</button>
+            <button type="button" id="currentMonthBtn">Aktueller Monat</button>
+            <button type="button" id="nextMonthBtn">Nächster Monat →</button>
+          </div>
+          <button type="button" class="gold" id="fillJanTopBtn" style="width:100%;margin-bottom:10px">Ab Januar automatisch ausfüllen</button>
           <div class="muted" id="monthSummary" style="margin-bottom:10px">Fertige Tage werden grün angezeigt.</div>
           <div id="dayOverviewList" class="overview-list"></div>
         </div>
@@ -1178,7 +1186,8 @@ let saveTimer = null;
       list.appendChild(row);
     });
 
-    summary.textContent = doneDays + " von " + dates.length + " Tagen in diesem Monat fertig.";
+    const monthName = selected.toLocaleDateString("de-DE", {month:"long", year:"numeric"});
+    summary.textContent = monthName + " · " + doneDays + " von " + dates.length + " Tagen fertig.";
   }
 
   function statusBadge(text, cls){
@@ -1601,6 +1610,50 @@ let saveTimer = null;
     renderAll();
   }
 
+  function jumpToMonth(monthOffset){
+    const selected = keyToDate(state.selectedDate);
+    const next = new Date(selected.getFullYear(), selected.getMonth() + monthOffset, 1);
+    const today = new Date();
+    if(next > today) return;
+    state.selectedDate = dateKey(next);
+    state.selectedShift = "morning";
+    resetWizard();
+    renderAll();
+    openDetail("dayOverview");
+    saveState("Monat geöffnet · " + next.toLocaleDateString("de-DE", {month:"long", year:"numeric"}));
+  }
+
+  function jumpToJanuary(){
+    const year = new Date().getFullYear();
+    state.selectedDate = year + "-01-01";
+    state.selectedShift = "morning";
+    resetWizard();
+    renderAll();
+    openDetail("dayOverview");
+    saveState("Januar geöffnet");
+  }
+
+  function jumpToCurrentMonth(){
+    const today = new Date();
+    state.selectedDate = dateKey(new Date(today.getFullYear(), today.getMonth(), 1));
+    state.selectedShift = "morning";
+    resetWizard();
+    renderAll();
+    openDetail("dayOverview");
+    saveState("Aktueller Monat geöffnet");
+  }
+
+  function fillFromJanuaryAndRender(){
+    const res = fillMissingFromJanuary({persist:true});
+    renderAll();
+    if(res.changed){
+      document.getElementById("statusBox").textContent =
+        "Wiederherstellung: " + res.createdDays + " Tage hinzugefügt, " + res.closedSlots + " Schichten geschlossen, " + res.filledSlots + " Schichten N/D ausgefüllt";
+    }else{
+      document.getElementById("statusBox").textContent = "Kein fehlender Tag von Januar bis heute";
+    }
+  }
+
   document.getElementById("todayLabel").textContent = new Date().toLocaleDateString("de-DE", {
     weekday:"long", day:"2-digit", month:"long", year:"numeric"
   });
@@ -1641,16 +1694,12 @@ let saveTimer = null;
 
   document.getElementById("resetBtn").addEventListener("click", resetCurrent);
 
-  document.getElementById("fillJanBtn").addEventListener("click", () => {
-    const res = fillMissingFromJanuary({persist:true});
-    renderAll();
-    if(res.changed){
-      document.getElementById("statusBox").textContent =
-        "Wiederherstellung: " + res.createdDays + " Tage hinzugefügt, " + res.closedSlots + " Schichten geschlossen, " + res.filledSlots + " Schichten N/D ausgefüllt";
-    }else{
-      document.getElementById("statusBox").textContent = "Kein fehlender Tag von Januar bis heute";
-    }
-  });
+  document.getElementById("fillJanBtn").addEventListener("click", fillFromJanuaryAndRender);
+  document.getElementById("fillJanTopBtn").addEventListener("click", fillFromJanuaryAndRender);
+  document.getElementById("prevMonthBtn").addEventListener("click", () => jumpToMonth(-1));
+  document.getElementById("nextMonthBtn").addEventListener("click", () => jumpToMonth(1));
+  document.getElementById("januaryBtn").addEventListener("click", jumpToJanuary);
+  document.getElementById("currentMonthBtn").addEventListener("click", jumpToCurrentMonth);
   document.getElementById("demoBtn").addEventListener("click", loadClientDemo);
   document.getElementById("copyPrevBtn").addEventListener("click", copyLatestSimilarToCurrent);
   document.getElementById("applyRangeBtn").addEventListener("click", applyModelToDateRange);
