@@ -455,6 +455,21 @@ let saveTimer = null;
     }, 350);
   }
 
+  function saveStateNow(msg){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if(msg) document.getElementById("statusBox").textContent = msg;
+    clearTimeout(saveTimer);
+    return saveCloudNow()
+      .then(() => {
+        cloudReady = true;
+        if(msg) document.getElementById("statusBox").textContent = msg + " · Online";
+      })
+      .catch(err => {
+        console.error("Errore Firebase:", err);
+        document.getElementById("statusBox").textContent = "Firebase-Fehler: Daten lokal gespeichert";
+      });
+  }
+
   function ensureDate(date){
     if(!state.records[date]){
       state.records[date] = {morning: emptySlot(), evening: emptySlot()};
@@ -957,6 +972,7 @@ let saveTimer = null;
   function fillQuickTempsOk(){
     const slot = currentSlot();
     ensureSlotShape(slot);
+    markManualSlotUpdate(slot);
     [...tempKitchen, ...tempRoom].forEach(item => {
       const cur = toText(slot.temps[item.key]).toUpperCase();
       if(cur === "" || cur === "N/D" || cur === "ND"){
@@ -974,6 +990,7 @@ let saveTimer = null;
   function fillQuickCleaningYes(){
     const slot = currentSlot();
     ensureSlotShape(slot);
+    markManualSlotUpdate(slot);
     cleaningItems.forEach(name => {
       slot.cleaning[name] = true;
     });
@@ -988,6 +1005,7 @@ let saveTimer = null;
   function completeQuickTurn(){
     const slot = currentSlot();
     ensureSlotShape(slot);
+    markManualSlotUpdate(slot);
     [...tempKitchen, ...tempRoom].forEach(item => {
       const cur = toText(slot.temps[item.key]).toUpperCase();
       if(cur === "" || cur === "N/D" || cur === "ND"){
@@ -1080,9 +1098,14 @@ let saveTimer = null;
     ensureSlotShape(current);
     ensureSlotShape(incoming);
     if(isSlotEmpty(current)) return true;
-    if(isRecoveredSlot(current) && isRecoveredSlot(incoming)) return true;
-    if(!tempsAnswered(current) && tempsAnswered(incoming)) return true;
     return false;
+  }
+
+  function markManualSlotUpdate(slot){
+    ensureSlotShape(slot);
+    if(isRecoveredSlot(slot)){
+      slot.notes = "Manuell aktualisiert";
+    }
   }
 
   async function mergeSeedRecords(){
@@ -1327,6 +1350,7 @@ let saveTimer = null;
         if(toText(slot.temps[step.item.key]).toUpperCase() === value) btn.classList.add("active");
         btn.addEventListener("click", () => {
           slot.temps[step.item.key] = value;
+          markManualSlotUpdate(slot);
           if(toText(slot.time) === ""){
             slot.time = defaultTimeForShift(state.selectedShift);
             state.selectedTime = slot.time;
@@ -1345,6 +1369,7 @@ let saveTimer = null;
       hint.textContent = "Wurde diese Reinigung gemacht?";
       addYesNoButtons(choices, slot.cleaning[step.name], value => {
         slot.cleaning[step.name] = value;
+        markManualSlotUpdate(slot);
         wizardIndex += 1;
         saveState("Reinigung " + (value ? "JA" : "NEIN") + " · " + displayCleaning(step.name) + " · " + state.selectedDate + " · " + shiftLabel());
         renderAll();
@@ -1357,6 +1382,7 @@ let saveTimer = null;
       hint.textContent = "Sind heute Lieferanten gekommen und war alles in Ordnung?";
       addSupplierButtons(choices, slot.suppliers, value => {
         slot.suppliers = value;
+        markManualSlotUpdate(slot);
         wizardIndex += 1;
         saveState("Wareneingang · " + supplierLabel(value) + " · " + state.selectedDate + " · " + shiftLabel());
         renderAll();
@@ -1371,6 +1397,7 @@ let saveTimer = null;
       const currentAnswer = current.clean === true && current.ok === true ? true : ((current.clean === false || current.ok === false) ? false : null);
       addYesNoButtons(choices, currentAnswer, value => {
         slot.equipment[step.name] = {clean:value, ok:value};
+        markManualSlotUpdate(slot);
         wizardIndex += 1;
         saveState("Gerät " + (value ? "OK" : "NEIN") + " · " + displayEquipment(step.name) + " · " + state.selectedDate + " · " + shiftLabel());
         renderAll();
@@ -1422,7 +1449,8 @@ let saveTimer = null;
       slot.time = defaultTimeForShift(state.selectedShift);
       state.selectedTime = slot.time;
     }
-    saveState("Kontrolle gespeichert · " + state.selectedDate + " · " + shiftLabel());
+    markManualSlotUpdate(slot);
+    saveStateNow("Kontrolle gespeichert · " + state.selectedDate + " · " + shiftLabel()).then(() => renderAll());
     renderAll();
   }
 
@@ -1474,6 +1502,7 @@ let saveTimer = null;
         if(toText(slot.temps[item.key]).toUpperCase() === value) btn.classList.add("active");
         btn.addEventListener("click", () => {
           slot.temps[item.key] = value;
+          markManualSlotUpdate(slot);
           if(toText(slot.time) === ""){
             slot.time = defaultTimeForShift(state.selectedShift);
             state.selectedTime = slot.time;
@@ -1524,6 +1553,7 @@ let saveTimer = null;
 
       yes.addEventListener("click", () => {
         slot.cleaning[name] = true;
+        markManualSlotUpdate(slot);
         saveState("Reinigung JA · " + displayCleaning(name) + " · " + state.selectedDate + " · " + shiftLabel());
         renderCleaning();
         renderHistory();
@@ -1531,6 +1561,7 @@ let saveTimer = null;
 
       no.addEventListener("click", () => {
         slot.cleaning[name] = false;
+        markManualSlotUpdate(slot);
         saveState("Reinigung NEIN · " + displayCleaning(name) + " · " + state.selectedDate + " · " + shiftLabel());
         renderCleaning();
         renderHistory();
@@ -1560,6 +1591,7 @@ let saveTimer = null;
     controls.className = "temp-options";
     addSupplierButtons(controls, slot.suppliers, value => {
       slot.suppliers = value;
+      markManualSlotUpdate(slot);
       saveState("Wareneingang · " + supplierLabel(value) + " · " + state.selectedDate + " · " + shiftLabel());
       renderAll();
     });
@@ -1602,10 +1634,12 @@ let saveTimer = null;
 
       cb1.addEventListener("change", () => {
         slot.equipment[name].clean = cb1.checked;
+        markManualSlotUpdate(slot);
         saveState("Gerät aktualisiert · " + state.selectedDate + " · " + shiftLabel());
       });
       cb2.addEventListener("change", () => {
         slot.equipment[name].ok = cb2.checked;
+        markManualSlotUpdate(slot);
         saveState("Gerät aktualisiert · " + state.selectedDate + " · " + shiftLabel());
       });
 
@@ -1766,6 +1800,7 @@ let saveTimer = null;
   document.getElementById("timeInput").addEventListener("change", e => {
     state.selectedTime = e.target.value;
     currentSlot().time = e.target.value;
+    markManualSlotUpdate(currentSlot());
     saveState("Zeit aktualisiert · " + state.selectedDate + " · " + shiftLabel());
     renderHistory();
   });
@@ -1776,12 +1811,14 @@ let saveTimer = null;
 
   document.getElementById("notesInput").addEventListener("input", e => {
     currentSlot().notes = e.target.value;
+    markManualSlotUpdate(currentSlot());
     saveState("Notizen aktualisiert · " + state.selectedDate + " · " + shiftLabel());
   });
 
   document.getElementById("saveBtn").addEventListener("click", () => {
     currentSlot().time = document.getElementById("timeInput").value || "";
-    saveState("Schicht gespeichert · " + state.selectedDate + " · " + shiftLabel());
+    markManualSlotUpdate(currentSlot());
+    saveStateNow("Schicht gespeichert · " + state.selectedDate + " · " + shiftLabel());
     renderHistory();
   });
 
