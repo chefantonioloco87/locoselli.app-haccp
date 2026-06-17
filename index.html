@@ -80,6 +80,11 @@
     .badge.done{background:rgba(31,139,77,.18);border-color:rgba(31,139,77,.45);color:#9ae3b6}
     .badge.open{background:rgba(180,60,60,.16);border-color:rgba(180,60,60,.38);color:#ffb8b8}
     .badge.closed{background:rgba(180,172,157,.12);border-color:rgba(180,172,157,.28);color:var(--muted)}
+    .month-data{margin-top:14px}
+    .month-data-row{display:grid;grid-template-columns:92px 76px 74px 1.2fr 92px 92px 92px 1fr;gap:8px;align-items:start;padding:9px;border-bottom:1px solid var(--line);font-size:12px}
+    .month-data-row.header{position:sticky;top:0;background:#1d2028;color:#e7ca8c;font-weight:800;border-radius:10px 10px 0 0}
+    .month-data-row:nth-child(even):not(.header){background:rgba(255,255,255,.025)}
+    .month-data-row span{min-width:0;overflow-wrap:anywhere}
     .small-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
     .quick-note{margin-top:10px;color:var(--muted);font-size:14px;line-height:1.45}
     .chip{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px}
@@ -108,7 +113,7 @@
       .temp-options{grid-template-columns:repeat(3,1fr)}
       .quick-actions{grid-template-columns:1fr}
       .wizard-choices{grid-template-columns:repeat(2,1fr)}
-      .small-actions,.today-summary,.day-row,.month-nav{grid-template-columns:1fr}
+      .small-actions,.today-summary,.day-row,.month-nav,.month-data-row{grid-template-columns:1fr}
       .bulkgrid{grid-template-columns:1fr}
     }
   </style>
@@ -286,6 +291,13 @@
           <button type="button" class="gold" id="fillJanTopBtn" style="width:100%;margin-bottom:10px">Ab Januar automatisch ausfüllen</button>
           <div class="muted" id="monthSummary" style="margin-bottom:10px">Fertige Tage werden grün angezeigt.</div>
           <div id="dayOverviewList" class="overview-list"></div>
+          <div class="month-data">
+            <h3>Monatsdaten HACCP</h3>
+            <div class="muted" style="margin-bottom:8px">Alle gespeicherten Kontrollen des angezeigten Monats.</div>
+            <div class="tablewrap">
+              <div id="monthDataList"></div>
+            </div>
+          </div>
         </div>
       </details>
 
@@ -1142,8 +1154,10 @@ let saveTimer = null;
   function renderDayOverview(){
     const list = document.getElementById("dayOverviewList");
     const summary = document.getElementById("monthSummary");
+    const monthData = document.getElementById("monthDataList");
     if(!list || !summary) return;
     list.innerHTML = "";
+    if(monthData) monthData.innerHTML = "";
 
     const selected = keyToDate(state.selectedDate);
     const start = new Date(selected.getFullYear(), selected.getMonth(), 1);
@@ -1157,6 +1171,17 @@ let saveTimer = null;
     }
 
     let doneDays = 0;
+    if(monthData){
+      const header = document.createElement("div");
+      header.className = "month-data-row header";
+      ["Datum","Schicht","Status","Temperaturen","Fornitori","Pulizie","Attrezz.","Note"].forEach(text => {
+        const span = document.createElement("span");
+        span.textContent = text;
+        header.appendChild(span);
+      });
+      monthData.appendChild(header);
+    }
+
     dates.forEach(date => {
       const status = dayCompletion(date);
       if(status.done) doneDays += 1;
@@ -1184,6 +1209,40 @@ let saveTimer = null;
       row.appendChild(evening);
       row.appendChild(day);
       list.appendChild(row);
+
+      if(monthData){
+        ["morning","evening"].forEach(shift => {
+          const slot = ensureDate(date)[shift];
+          ensureSlotShape(slot);
+          const dataRow = document.createElement("button");
+          dataRow.type = "button";
+          dataRow.className = "month-data-row";
+          dataRow.addEventListener("click", () => {
+            state.selectedDate = date;
+            state.selectedShift = shift;
+            resetWizard();
+            renderAll();
+            document.getElementById("quickStart").scrollIntoView({behavior:"smooth", block:"start"});
+            saveState("Kontrolle geöffnet · " + date + " · " + shiftLabel(shift));
+          });
+          const shiftDone = status.closed || isShiftComplete(slot, shift);
+          [
+            date,
+            shiftLabel(shift),
+            status.closed ? "Geschlossen" : (shiftDone ? "Fertig" : "Offen"),
+            tempSummary(slot),
+            shift === "morning" ? "—" : supplierLabel(slot.suppliers),
+            shift === "morning" ? "—" : cleaningSummary(slot),
+            shift === "morning" ? "—" : equipmentSummary(slot),
+            toText(slot.notes) || "—"
+          ].forEach(text => {
+            const span = document.createElement("span");
+            span.textContent = text;
+            dataRow.appendChild(span);
+          });
+          monthData.appendChild(dataRow);
+        });
+      }
     });
 
     const monthName = selected.toLocaleDateString("de-DE", {month:"long", year:"numeric"});
@@ -1195,6 +1254,40 @@ let saveTimer = null;
     badge.className = "badge " + cls;
     badge.textContent = text;
     return badge;
+  }
+
+  function tempSummary(slot){
+    ensureSlotShape(slot);
+    if(toText(slot.time).toUpperCase() === "CHIUSO") return "Geschlossen";
+    const total = tempKitchen.length + tempRoom.length;
+    const answered = [...tempKitchen, ...tempRoom].filter(item => toText(slot.temps[item.key]) !== "").length;
+    const ok = countTempOk(slot);
+    if(isRecoveredSlot(slot)) return answered + "/" + total + " N/D";
+    return ok + "/" + total + " OK";
+  }
+
+  function cleaningSummary(slot){
+    ensureSlotShape(slot);
+    if(isRecoveredSlot(slot)) return "Archiviert";
+    const yes = cleaningItems.filter(name => slot.cleaning[name] === true).length;
+    const no = cleaningItems.filter(name => slot.cleaning[name] === false).length;
+    const open = cleaningItems.length - yes - no;
+    return "JA " + yes + " · NEIN " + no + (open > 0 ? " · offen " + open : "");
+  }
+
+  function equipmentSummary(slot){
+    ensureSlotShape(slot);
+    if(isRecoveredSlot(slot)) return "Archiviert";
+    const yes = equipmentItems.filter(name => {
+      const item = slot.equipment[name] || {};
+      return item.clean === true && item.ok === true;
+    }).length;
+    const no = equipmentItems.filter(name => {
+      const item = slot.equipment[name] || {};
+      return item.clean === false || item.ok === false;
+    }).length;
+    const open = equipmentItems.length - yes - no;
+    return "OK " + yes + " · NEIN " + no + (open > 0 ? " · offen " + open : "");
   }
 
   function renderWizard(){
