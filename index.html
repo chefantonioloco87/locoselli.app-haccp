@@ -1108,6 +1108,31 @@ let saveTimer = null;
     }
   }
 
+  function hasManualSlotData(slot){
+    ensureSlotShape(slot);
+    if(isSlotEmpty(slot)) return false;
+    return !isRecoveredSlot(slot);
+  }
+
+  function mergeRecordsPreferManual(localRecords = {}, remoteRecords = {}){
+    const merged = cloneData(remoteRecords || {});
+    Object.keys(localRecords || {}).forEach(date => {
+      if(!merged[date]) merged[date] = {morning: emptySlot(), evening: emptySlot()};
+      ["morning","evening"].forEach(shift => {
+        const localSlot = cloneData((localRecords[date] || {})[shift] || emptySlot());
+        const remoteSlot = cloneData((merged[date] || {})[shift] || emptySlot());
+        ensureSlotShape(localSlot);
+        ensureSlotShape(remoteSlot);
+        if(hasManualSlotData(localSlot) || isSlotEmpty(remoteSlot)){
+          merged[date][shift] = localSlot;
+        }else{
+          merged[date][shift] = remoteSlot;
+        }
+      });
+    });
+    return merged;
+  }
+
   async function mergeSeedRecords(){
     try{
       const response = await fetch("seed-records.json", {cache:"no-store"});
@@ -1866,6 +1891,18 @@ let saveTimer = null;
     loadRow(row.dataset.date, row.dataset.shift);
   }, {passive:true});
 
+  function emergencyLocalSave(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if(!state.demoMode && !applyingRemote){
+      saveCloudNow().catch(() => {});
+    }
+  }
+
+  window.addEventListener("pagehide", emergencyLocalSave);
+  document.addEventListener("visibilitychange", () => {
+    if(document.visibilityState === "hidden") emergencyLocalSave();
+  });
+
   document.getElementById("exportBtn").addEventListener("click", () => {
     const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
     const a = document.createElement("a");
@@ -1911,14 +1948,13 @@ let saveTimer = null;
       if(snap.exists()){
         const cloud = snap.data();
         if(cloud && cloud.records){
-          state.records = cloud.records;
+          const localBeforeCloud = cloneData(state.records || {});
+          state.records = mergeRecordsPreferManual(localBeforeCloud, cloud.records);
           const seedAdded = await mergeSeedRecords();
           const restored = fillMissingFromJanuary({persist:true});
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           renderAll();
-          if(seedAdded > 0 || restored.changed){
-            await saveCloudNow();
-          }
+          await saveCloudNow();
           document.getElementById("statusBox").textContent = restored.changed
             ? "Firebase-Daten · " + (restored.createdDays + seedAdded) + " Tage/Schichten hinzugefügt, " + restored.closedSlots + " geschlossen, " + restored.filledSlots + " N/D"
             : "Daten aus Firebase geladen · Online";
@@ -1936,7 +1972,7 @@ let saveTimer = null;
         const cloud = snap.data();
         if(!cloud || !cloud.records) return;
         applyingRemote = true;
-        state.records = cloud.records;
+        state.records = mergeRecordsPreferManual(state.records || {}, cloud.records);
         fillMissingFromJanuary({persist:false});
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         renderAll();
